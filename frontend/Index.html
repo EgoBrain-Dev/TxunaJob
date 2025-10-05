@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TxunaJob - Plataforma de Serviços Locais</title>
+    
+    <!-- Importação de recursos externos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Link de acessibilidade para pular para conteúdo principal -->
+    <a href="#main" class="skip-link">Saltar para conteúdo principal</a>
+
+    <!-- Cabeçalho com navegação principal -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-hands-helping"></i>
+                <span>TxunaJob</span>
+            </div>
+            
+            <!-- Navegação desktop -->
+            <nav class="nav-links">
+                <a href="#"><i class="fas fa-home"></i> Início</a>
+                <a href="#"><i class="fas fa-play-circle"></i> Como Funciona</a>
+                <a href="#"><i class="fas fa-list"></i> Categorias</a>
+                <a href="#"><i class="fas fa-user-hard-hat"></i> Para Trabalhadores</a>
+            </nav>
+            
+            <!-- Ações do cabeçalho -->
+            <div class="header-actions">
+                <button class="theme-switcher" id="themeSwitcher" aria-label="Alternar tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-accessibility" id="accessibilityToggle" aria-label="Painel de acessibilidade">
+                    <i class="fas fa-universal-access"></i>
+                </button>
+                
+                <!-- Botões de autenticação desktop -->
+                <div class="auth-buttons">
+                    <button class="btn btn-outline" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                    <button class="btn btn-primary" onclick="showRegisterModal()"><i class="fas fa-user-plus"></i> Registar</button>
+                </div>
+                
+                <!-- Botão menu mobile -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu Mobile -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Fechar menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav class="nav-links">
+            <a href="#"><i class="fas fa-home"></i> Início</a>
+            <a href="#"><i class="fas fa-play-circle"></i> Como Funciona</a>
+            <a href="#"><i class="fas fa-list"></i> Categorias</a>
+            <a href="#"><i class="fas fa-user-hard-hat"></i> Para Trabalhadores</a>
+        </nav>
+        <div class="auth-buttons">
+            <button class="btn btn-outline" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+            <button class="btn btn-primary" onclick="showRegisterModal()"><i class="fas fa-user-plus"></i> Registar</button>
+        </div>
+    </div>
+    
+    <!-- Overlay para menu mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Painel de Acessibilidade -->
+    <div class="accessibility-panel" id="accessibilityPanel">
+        <h3><i class="fas fa-universal-access"></i> Acessibilidade</h3>
+        
+        <div class="accessibility-option">
+            <h4>Tamanho do Texto</h4>
+            <div class="text-size-buttons">
+                <button class="text-size-btn" data-size="normal">A</button>
+                <button class="text-size-btn" data-size="large">A+</button>
+                <button class="text-size-btn" data-size="larger">A++</button>
+            </div>
+        </div>
+        
+        <div class="accessibility-option">
+            <label>
+                <input type="checkbox" id="highContrast">
+                <span>Alto Contraste</span>
+            </label>
+        </div>
+        
+        <div class="accessibility-option">
+            <label>
+                <input type="checkbox" id="disableAnimations">
+                <span>Desativar Animações</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- MODAIS DE AUTENTICAÇÃO ELEGANTES -->
+    <!-- ========================================================================= -->
+
+    <!-- Modal de Login -->
+    <div id="loginModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-sign-in-alt"></i> Entrar na sua conta</h2>
+                <button class="modal-close" onclick="closeLoginModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail"><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="loginEmail" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword"><i class="fas fa-lock"></i> Senha</label>
+                        <input type="password" id="loginPassword" required placeholder="Sua senha">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-sign-in-alt"></i> Entrar
+                    </button>
+                </form>
+                <div class="modal-footer">
+                    <p>Não tem conta? <a href="#" onclick="showRegisterModal(); closeLoginModal()">Registre-se aqui</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de Cadastro -->
+    <div id="registerModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-user-plus"></i> Criar nova conta</h2>
+                <button class="modal-close" onclick="closeRegisterModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="registerName"><i class="fas fa-user"></i> Nome completo</label>
+                        <input type="text" id="registerName" required placeholder="Seu nome completo">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerEmail"><i class="fas fa-envelope"></i> Email</label>
+                        <input type="email" id="registerEmail" required placeholder="seu@email.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPassword"><i class="fas fa-lock"></i> Senha</label>
+                        <input type="password" id="registerPassword" required placeholder="Crie uma senha segura">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerUserType"><i class="fas fa-briefcase"></i> Tipo de conta</label>
+                        <select id="registerUserType" required>
+                            <option value="">Selecione...</option>
+                            <option value="client">👤 Cliente - Quero contratar serviços</option>
+                            <option value="professional">👷 Profissional - Quero oferecer serviços</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="registerPhone"><i class="fas fa-phone"></i> Telefone (opcional)</label>
+                        <input type="tel" id="registerPhone" placeholder="+258 84 123 4567">
+                    </div>
+                    <div class="form-group">
+                        <label for="registerLocation"><i class="fas fa-map-marker-alt"></i> Localização (opcional)</label>
+                        <input type="text" id="registerLocation" placeholder="Sua cidade ou bairro">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-user-plus"></i> Criar conta
+                    </button>
+                </form>
+                <div class="modal-footer">
+                    <p>Já tem conta? <a href="#" onclick="showLoginModal(); closeRegisterModal()">Faça login aqui</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- INTERFACE DE CHAT COMPLETA -->
+    <!-- ========================================================================= -->
+
+    <div id="chatInterface" class="chat-interface hidden">
+        <div class="chat-header">
+            <div class="chat-header-info">
+                <h3><i class="fas fa-comments"></i> Chat TxunaJob</h3>
+                <span class="chat-status" id="chatStatus">Conectando...</span>
+            </div>
+            <button class="chat-close" onclick="closeChat()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="chat-container">
+            <!-- Lista de conversas -->
+            <div class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <h4>Conversas</h4>
+                    <button class="btn btn-sm" onclick="startNewChat()">
+                        <i class="fas fa-plus"></i> Nova
+                    </button>
+                </div>
+                <div class="chat-list" id="chatList">
+                    <!-- Lista de chats será carregada dinamicamente -->
+                    <div class="chat-list-loading">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Carregando conversas...</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Área de mensagens -->
+            <div class="chat-main">
+                <div class="chat-messages" id="chatMessages">
+                    <div class="chat-welcome">
+                        <i class="fas fa-comments"></i>
+                        <h3>Bem-vindo ao Chat TxunaJob</h3>
+                        <p>Selecione uma conversa para começar a trocar mensagens</p>
+                    </div>
+                </div>
+                
+                <div class="chat-input-container">
+                    <div class="chat-input">
+                        <input type="text" id="chatMessageInput" placeholder="Digite sua mensagem..." disabled>
+                        <button id="sendMessageBtn" class="btn btn-primary" disabled>
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay para modais -->
+    <div class="modal-overlay hidden" id="modalOverlay"></div>
+
+    <!-- Sistema de Notificações Melhorado -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Conteúdo Principal -->
+    <main id="main">
+        <!-- Seção Hero (Principal) -->
+        <section class="hero">
+            <div class="container">
+                <h1>Encontre os melhores profissionais perto de você</h1>
+                <p>TxunaJob conecta você a profissionais qualificados para diversos serviços, com segurança, praticidade e acessibilidade para todos.</p>
+                <div class="auth-buttons">
+                    <button class="btn btn-primary" onclick="showRegisterModal()"><i class="fas fa-user"></i> Sou Cliente</button>
+                    <button class="btn btn-outline" onclick="showRegisterModal()"><i class="fas fa-briefcase"></i> Sou Profissional</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Recursos/Features -->
+        <section class="features">
+            <div class="container">
+                <h2 class="section-title">Por que escolher o TxunaJob?</h2>
+                <div class="features-grid" id="professionalsGrid">
+                    <!-- Conteúdo dinâmico será carregado via JavaScript -->
+                    <div class="loading-spinner">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <p>Carregando profissionais...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Segurança -->
+        <section class="security">
+            <div class="container">
+                <h2 class="section-title">Segurança Avançada e Tecnologia</h2>
+                <div class="security-features">
+                    <div class="security-item">
+                        <div class="security-icon"><i class="fas fa-fingerprint"></i></div>
+                        <div>
+                            <h3>Verificação Biométrica</h3>
+                            <p>Acesso seguro através de impressão digital ou reconhecimento facial</p>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon"><i class="fas fa-lock"></i></div>
+                        <div>
+                            <h3>Criptografia de Ponta a Ponta</h3>
+                            <p>Todas as mensagens e dados sensíveis são criptografados</p>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon"><i class="fas fa-cloud-shield"></i></div>
+                        <div>
+                            <h3>Backup Seguro na Nuvem</h3>
+                            <p>Seus dados são protegidos com backup automático e seguro</p>
+                        </div>
+                    </div>
+                    <div class="security-item">
+                        <div class="security-icon"><i class="fas fa-robot"></i></div>
+                        <div>
+                            <h3>IA Anti-Fraude</h3>
+                            <p>Inteligência Artificial para detectar e prevenir atividades suspeitas</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Como Funciona -->
+        <section class="how-it-works">
+            <div class="container">
+                <h2 class="section-title">Como funciona</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Pesquise</h3>
+                        <p>Encontre profissionais por categoria, localização ou avaliação</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Contrate</h3>
+                        <p>Escolha o profissional e agende o serviço com todos os detalhes</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Acompanhe</h3>
+                        <p>Acompanhe o andamento em tempo real com geolocalização</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">4</div>
+                        <h3>Pague & Avalie</h3>
+                        <p>Pague com segurança pela plataforma e avalie o serviço recebido</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção de Depoimentos -->
+        <section class="testimonials">
+            <div class="container">
+                <h2 class="section-title">O que nossos usuários dizem</h2>
+                <div class="testimonial-grid">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"Encontrei um eletricista excelente em menos de 1 hora. O sistema de verificação me deixou seguro e o preço foi justo!"</p>
+                        <p class="testimonial-author"><i class="fas fa-user"></i> Maria Silva, Maputo</p>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"Como pintor, o TxunaJob me ajudou a conseguir mais clientes. O sistema de pagamento dentro do app garante que recebo pelo meu trabalho."</p>
+                        <p class="testimonial-author"><i class="fas fa-user"></i> João Matsinhe, Profissional</p>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star-half-alt"></i>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"A validação de documentos com selfie me deixou mais segura para contratar profissionais para minha casa. A IA que previne troca de contatos é excelente!"</p>
+                        <p class="testimonial-author"><i class="fas fa-user"></i> Carla dos Santos, Matola</p>
+                        <div class="rating">
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                            <i class="fas fa-star"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Seção Call-to-Action -->
+        <section class="cta-section">
+            <div class="container">
+                <h2>Pronto para começar?</h2>
+                <p>Junte-se à comunidade TxunaJob hoje mesmo</p>
+                <div class="cta-buttons">
+                    <button class="btn btn-primary"><i class="fab fa-android"></i> Baixar para Android</button>
+                    <button class="btn btn-outline"><i class="fab fa-apple"></i> Baixar para iOS</button>
+                    <button class="btn btn-outline"><i class="fas fa-globe"></i> Acessar via Web</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3><i class="fas fa-hands-helping"></i> TxunaJob</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+                        <li><a href="#"><i class="fas fa-play-circle"></i> Como funciona</a></li>
+                        <li><a href="#"><i class="fas fa-briefcase"></i> Carreiras</a></li>
+                        <li><a href="#"><i class="fas fa-blog"></i> Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3><i class="fas fa-user-hard-hat"></i> Para Profissionais</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-user-plus"></i> Tornar-se Profissional</a></li>
+                        <li><a href="#"><i class="fas fa-graduation-cap"></i> Centro de Formação</a></li>
+                        <li><a href="#"><i class="fas fa-chart-line"></i> Dicas de Sucesso</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Centro de Ajuda</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3><i class="fas fa-user"></i> Para Clientes</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-search"></i> Como Contratar</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> Dicas de Segurança</a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> Termos de Uso</a></li>
+                        <li><a href="#"><i class="fas fa-lock"></i> Política de Privacidade</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3><i class="fas fa-mobile-alt"></i> Aplicativo</h3>
+                    <div class="download-badges">
+                        <div class="badge">
+                            <i class="fab fa-android"></i>
+                            <span>Android</span>
+                        </div>
+                        <div class="badge">
+                            <i class="fab fa-apple"></i>
+                            <span>iOS</span>
+                        </div>
+                    </div>
+                    <h3 style="margin-top: 20px;"><i class="fas fa-headset"></i> Suporte</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-envelope"></i> suporte@txunajob.com</a></li>
+                        <li><a href="#"><i class="fas fa-phone"></i> +258 84 123 4567</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 EgoBrain-Dev - Todos os direitos reservados</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Importação do JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
