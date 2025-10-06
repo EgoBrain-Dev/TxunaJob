@@ -1,7 +1,9 @@
-# wsgi.py - Arquivo para deploy no Vercel
-from app import create_app
+# wsgi.py - CORRIGIDO
+from app import app, init_db
 
-app = create_app()
+# Inicializar banco de dados para produção
+with app.app_context():
+    init_db()
 
 if __name__ == '__main__':
     app.run()
