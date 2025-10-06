@@ -1,0 +1,244 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Profissional - TxunaJob{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header do Dashboard -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="dashboard-welcome">
+                <h1>Bem-vindo, {{ current_user.username }}! 🛠️</h1>
+                <p>Gerencie seus serviços e conecte-se com clientes</p>
+                <div class="user-badge">
+                    <i class="fas fa-briefcase"></i>
+                    <span>Profissional Verificado</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Estatísticas do Profissional -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <div class="stat-number">8</div>
+                <div class="stat-label">Serviços Ativos</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <div class="stat-number">4.8</div>
+                <div class="stat-label">Avaliação Média</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stat-number">12</div>
+                <div class="stat-label">Clientes Este Mês</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="stat-number">15</div>
+                <div class="stat-label">Mensagens</div>
+            </div>
+        </div>
+
+        <!-- Informações do Perfil -->
+        <div class="dashboard-card" style="margin-bottom: 2rem;">
+            <div class="card-header">
+                <h2><i class="fas fa-id-card"></i> Meu Perfil</h2>
+            </div>
+            <div class="card-body">
+                <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
+                    <div style="flex: 1; min-width: 200px;">
+                        <h3 style="margin-bottom: 0.5rem; color: var(--dark-text);">
+                            {{ current_user.professional_profile.full_name if current_user.professional_profile else current_user.username }}
+                        </h3>
+                        <div class="specialty-badge" style="margin-bottom: 1rem;">
+                            <i class="fas fa-tools"></i>
+                            {{ current_user.professional_profile.specialty if current_user.professional_profile else 'Especialidade' }}
+                        </div>
+                        <div class="rating-display" style="margin-bottom: 0.5rem;">
+                            <i class="fas fa-star"></i>
+                            <span>4.8 (42 avaliações)</span>
+                        </div>
+                        <p style="color: var(--dark-text); opacity: 0.8; margin: 0;">
+                            <i class="fas fa-map-marker-alt"></i>
+                            {{ current_user.location if current_user.location else 'Localização não definida' }}
+                        </p>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="width: 80px; height: 80px; background: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <a href="{{ url_for('profile') }}" class="btn btn-outline" style="padding: 0.5rem 1rem;">
+                            <i class="fas fa-edit"></i> Editar Perfil
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="dashboard-grid">
+            <!-- Coluna Principal -->
+            <div class="dashboard-main">
+                <!-- Ações Rápidas -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bolt"></i> Ações Rápidas</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="#" class="action-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Novo Serviço</span>
+                            </a>
+                            <a href="#" class="action-btn">
+                                <i class="fas fa-calendar"></i>
+                                <span>Agenda</span>
+                            </a>
+                            <a href="#" class="action-btn">
+                                <i class="fas fa-comments"></i>
+                                <span>Mensagens</span>
+                            </a>
+                            <a href="#" class="action-btn">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Relatórios</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Serviços em Andamento -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-tasks"></i> Serviços em Andamento</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="service-list">
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title">Instalação Elétrica - Casa Silva</h3>
+                                    <span class="service-date">Hoje, 14:00</span>
+                                </div>
+                                <p class="service-description">Instalação completa do quadro elétrico e pontos de luz</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                    <span class="service-status status-in-progress">Em Andamento</span>
+                                    <span style="color: var(--primary-orange); font-weight: 600;">2.500 MT</span>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title">Manutenção - Empresa ABC</h3>
+                                    <span class="service-date">Amanhã, 09:00</span>
+                                </div>
+                                <p class="service-description">Manutenção preventiva do sistema elétrico</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                    <span class="service-status status-pending">Agendado</span>
+                                    <span style="color: var(--primary-orange); font-weight: 600;">1.800 MT</span>
+                                </div>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title">Reparo - Apartamento 302</h3>
+                                    <span class="service-date">18 Dez, 10:00</span>
+                                </div>
+                                <p class="service-description">Reparo nas tomadas do living e quartos</p>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                                    <span class="service-status status-pending">Confirmado</span>
+                                    <span style="color: var(--primary-orange); font-weight: 600;">950 MT</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar">
+                <!-- Próximos Agendamentos -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-clock"></i> Agenda</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="service-list">
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title" style="font-size: 0.9rem;">Casa Silva</h3>
+                                    <span class="service-date">Hoje</span>
+                                </div>
+                                <p class="service-description" style="font-size: 0.8rem;">14:00 - Instalação elétrica</p>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title" style="font-size: 0.9rem;">Empresa ABC</h3>
+                                    <span class="service-date">Amanhã</span>
+                                </div>
+                                <p class="service-description" style="font-size: 0.8rem;">09:00 - Manutenção</p>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title" style="font-size: 0.9rem;">Apartamento 302</h3>
+                                    <span class="service-date">18 Dez</span>
+                                </div>
+                                <p class="service-description" style="font-size: 0.8rem;">10:00 - Reparos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Avaliações Recentes -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-star"></i> Avaliações</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="message-list">
+                            <div class="message-item">
+                                <div class="message-header">
+                                    <h3 class="message-sender">Maria Santos</h3>
+                                    <div class="rating-display">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                    </div>
+                                </div>
+                                <p class="message-preview">Excelente profissional! Muito competente e educado...</p>
+                            </div>
+                            <div class="message-item">
+                                <div class="message-header">
+                                    <h3 class="message-sender">João Carlos</h3>
+                                    <div class="rating-display">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                </div>
+                                <p class="message-preview">Trabalho bem feito e dentro do prazo combinado...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

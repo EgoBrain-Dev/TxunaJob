@@ -1,0 +1,258 @@
+/* =============================================================================
+   PÁGINA DE SERVIÇOS - TxunaJob
+   ============================================================================= */
+
+.services-hero {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, #0099cc 100%);
+    color: white;
+    padding: 4rem 0;
+    text-align: center;
+}
+
+.services-hero h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+
+.services-hero p {
+    font-size: 1.2rem;
+    opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto 2rem;
+}
+
+.search-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.search-box input {
+    flex: 1;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+}
+
+.search-box button {
+    background: var(--primary-orange);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 12px 20px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s;
+}
+
+.search-box button:hover {
+    background: #e59400;
+}
+
+.filter-tags {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.filter-tag {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.filter-tag:hover, .filter-tag.active {
+    background: var(--primary-orange);
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 3rem 0;
+}
+
+.service-card {
+    background: var(--background-light);
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.service-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.service-image {
+    height: 200px;
+    background: var(--primary-blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 3rem;
+}
+
+.service-content {
+    padding: 1.5rem;
+}
+
+.service-category {
+    color: var(--primary-blue);
+    font-weight: 600;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.service-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-bottom: 0.5rem;
+}
+
+.service-description {
+    color: var(--dark-text);
+    opacity: 0.8;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.service-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.service-price {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--primary-orange);
+}
+
+.service-rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: var(--warning-yellow);
+}
+
+.service-professional {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.professional-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--primary-blue);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+}
+
+.professional-info h4 {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--dark-text);
+}
+
+.professional-info p {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--dark-text);
+    opacity: 0.7;
+}
+
+.service-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.service-actions .btn {
+    flex: 1;
+    justify-content: center;
+}
+
+/* Tema Escuro para Serviços */
+.dark-theme .service-card {
+    background: var(--dark-card);
+}
+
+.dark-theme .service-title {
+    color: var(--dark-text-color);
+}
+
+.dark-theme .service-description {
+    color: var(--dark-text-color);
+}
+
+.dark-theme .service-professional {
+    border-color: var(--dark-border);
+}
+
+.dark-theme .professional-info h4,
+.dark-theme .professional-info p {
+    color: var(--dark-text-color);
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+    .services-hero {
+        padding: 3rem 0;
+    }
+    
+    .services-hero h1 {
+        font-size: 2rem;
+    }
+    
+    .services-hero p {
+        font-size: 1.1rem;
+    }
+    
+    .search-box {
+        flex-direction: column;
+    }
+    
+    .services-grid {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+        padding: 2rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .services-hero {
+        padding: 2rem 0;
+    }
+    
+    .services-hero h1 {
+        font-size: 1.6rem;
+    }
+    
+    .service-actions {
+        flex-direction: column;
+    }
+}

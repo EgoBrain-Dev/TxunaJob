@@ -1,0 +1,198 @@
+<!-- templates/base.html -->
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}TxunaJob - Plataforma de Serviços Locais{% endblock %}</title>
+    <!-- Importação de recursos externos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Link de acessibilidade para pular para conteúdo principal -->
+    <a href="#main" class="skip-link">Saltar para conteúdo principal</a>
+    
+    <!-- Cabeçalho com navegação principal -->
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <i class="fas fa-hands-helping"></i>
+                <span>TxunaJob</span>
+            </div>
+            
+            <!-- Navegação desktop -->
+            <nav class="nav-links">
+                <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a>
+                <a href="#"><i class="fas fa-play-circle"></i> Como Funciona</a>
+                <a href="#"><i class="fas fa-list"></i> Categorias</a>
+                <a href="#"><i class="fas fa-user-hard-hat"></i> Para Trabalhadores</a>
+            </nav>
+            
+            <!-- Ações do cabeçalho -->
+            <div class="header-actions">
+                <button class="theme-switcher" id="themeSwitcher" aria-label="Alternar tema">
+                    <i class="fas fa-moon"></i>
+                </button>
+                <button class="btn btn-accessibility" id="accessibilityToggle" aria-label="Painel de acessibilidade">
+                    <i class="fas fa-universal-access"></i>
+                </button>
+                
+                <!-- Botões de autenticação desktop -->
+                <div class="auth-buttons">
+                    {% if current_user.is_authenticated %}
+                        <a class="btn btn-outline" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    {% else %}
+                        <button class="btn btn-outline" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                        <button class="btn btn-primary" onclick="showRegisterOptions()"><i class="fas fa-user-plus"></i> Registar</button>
+                    {% endif %}
+                </div>
+                
+                <!-- Botão menu mobile -->
+                <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Abrir menu">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Menu Mobile -->
+    <div class="mobile-menu" id="mobileMenu">
+        <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Fechar menu">
+            <i class="fas fa-times"></i>
+        </button>
+        <nav class="nav-links">
+            <a href="{{ url_for('index') }}"><i class="fas fa-home"></i> Início</a>
+            <a href="#"><i class="fas fa-play-circle"></i> Como Funciona</a>
+            <a href="#"><i class="fas fa-list"></i> Categorias</a>
+            <a href="#"><i class="fas fa-user-hard-hat"></i> Para Trabalhadores</a>
+        </nav>
+        <div class="auth-buttons">
+            {% if current_user.is_authenticated %}
+                <a class="btn btn-outline" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a>
+            {% else %}
+                <button class="btn btn-outline" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
+                <button class="btn btn-primary" onclick="showRegisterOptions()"><i class="fas fa-user-plus"></i> Registar</button>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Overlay para menu mobile -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Painel de Acessibilidade -->
+    <div class="accessibility-panel" id="accessibilityPanel">
+        <h3><i class="fas fa-universal-access"></i> Acessibilidade</h3>
+        <div class="accessibility-option">
+            <h4>Tamanho do Texto</h4>
+            <div class="text-size-buttons">
+                <button class="text-size-btn" data-size="normal">A</button>
+                <button class="text-size-btn" data-size="large">A+</button>
+                <button class="text-size-btn" data-size="larger">A++</button>
+            </div>
+        </div>
+        <div class="accessibility-option">
+            <label>
+                <input type="checkbox" id="highContrast">
+                <span>Alto Contraste</span>
+            </label>
+        </div>
+        <div class="accessibility-option">
+            <label>
+                <input type="checkbox" id="disableAnimations">
+                <span>Desativar Animações</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Sistema de Notificações -->
+    <div id="notificationContainer" class="notification-container"></div>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Conteúdo Principal -->
+    <main id="main">
+        {% block content %}
+        <!-- O conteúdo específico de cada página vai aqui -->
+        {% endblock %}
+    </main>
+
+    <!-- Rodapé -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3><i class="fas fa-hands-helping"></i> TxunaJob</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-info-circle"></i> Sobre nós</a></li>
+                        <li><a href="#"><i class="fas fa-play-circle"></i> Como funciona</a></li>
+                        <li><a href="#"><i class="fas fa-briefcase"></i> Carreiras</a></li>
+                        <li><a href="#"><i class="fas fa-blog"></i> Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3><i class="fas fa-user-hard-hat"></i> Para Profissionais</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-user-plus"></i> Tornar-se Profissional</a></li>
+                        <li><a href="#"><i class="fas fa-graduation-cap"></i> Centro de Formação</a></li>
+                        <li><a href="#"><i class="fas fa-chart-line"></i> Dicas de Sucesso</a></li>
+                        <li><a href="#"><i class="fas fa-question-circle"></i> Centro de Ajuda</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3><i class="fas fa-user"></i> Para Clientes</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-search"></i> Como Contratar</a></li>
+                        <li><a href="#"><i class="fas fa-shield-alt"></i> Dicas de Segurança</a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> Termos de Uso</a></li>
+                        <li><a href="#"><i class="fas fa-lock"></i> Política de Privacidade</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3><i class="fas fa-mobile-alt"></i> Aplicativo</h3>
+                    <div class="download-badges">
+                        <div class="badge">
+                            <i class="fab fa-android"></i>
+                            <span>Android</span>
+                        </div>
+                        <div class="badge">
+                            <i class="fab fa-apple"></i>
+                            <span>iOS</span>
+                        </div>
+                    </div>
+                    <h3 style="margin-top: 20px;"><i class="fas fa-headset"></i> Suporte</h3>
+                    <ul>
+                        <li><a href="#"><i class="fas fa-envelope"></i> suporte@txunajob.com</a></li>
+                        <li><a href="#"><i class="fas fa-phone"></i> +258 84 123 4567</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 EgoBrain-Dev - Todos os direitos reservados</p>
+                <div class="social-links">
+                    <a href="#"><i class="fab fa-facebook"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Importação do JavaScript -->
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

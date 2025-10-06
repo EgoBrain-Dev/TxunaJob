@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastro Profissional - TxunaJob{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1><i class="fas fa-briefcase"></i> Cadastro Profissional</h1>
+            <p>Junte-se à nossa rede de profissionais qualificados</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register_professional') }}" class="auth-form">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Nome de Usuário *</label>
+                <input type="text" id="username" name="username" required 
+                       placeholder="Escolha um nome de usuário único">
+            </div>
+
+            <div class="form-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email *</label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="seu@email.com">
+            </div>
+
+            <div class="form-group">
+                <label for="full_name"><i class="fas fa-id-card"></i> Nome Completo *</label>
+                <input type="text" id="full_name" name="full_name" required 
+                       placeholder="Seu nome completo">
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Senha *</label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Crie uma senha segura">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="specialty"><i class="fas fa-tools"></i> Especialidade *</label>
+                    <select id="specialty" name="specialty" required>
+                        <option value="">Selecione sua especialidade</option>
+                        <option value="Eletricista">Eletricista</option>
+                        <option value="Encanador">Encanador</option>
+                        <option value="Pintor">Pintor</option>
+                        <option value="Pedreiro">Pedreiro</option>
+                        <option value="Marceneiro">Marceneiro</option>
+                        <option value="Mecânico">Mecânico</option>
+                        <option value="Técnico Informática">Técnico de Informática</option>
+                        <option value="Jardineiro">Jardineiro</option>
+                        <option value="Diarista">Diarista</option>
+                        <option value="Outro">Outro</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="experience"><i class="fas fa-chart-line"></i> Experiência (anos)</label>
+                    <input type="number" id="experience" name="experience" min="0" 
+                           placeholder="Ex: 3">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="phone"><i class="fas fa-phone"></i> Telefone *</label>
+                    <input type="tel" id="phone" name="phone" required 
+                           placeholder="+258 84 123 4567">
+                </div>
+
+                <div class="form-group">
+                    <label for="location"><i class="fas fa-map-marker-alt"></i> Localização *</label>
+                    <input type="text" id="location" name="location" required 
+                           placeholder="Sua cidade ou bairro">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="description"><i class="fas fa-file-alt"></i> Descrição do Serviço</label>
+                <textarea id="description" name="description" rows="3" 
+                          placeholder="Descreva seus serviços e especialidades..."></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">
+                <i class="fas fa-briefcase"></i> Criar Conta Profissional
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>Já tem uma conta? <a href="{{ url_for('login') }}">Faça login aqui</a></p>
+            <p>É um cliente? <a href="{{ url_for('register_client') }}">Cadastre-se como Cliente</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

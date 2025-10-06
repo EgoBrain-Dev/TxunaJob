@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard Cliente - TxunaJob{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header do Dashboard -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="dashboard-welcome">
+                <h1>Olá, {{ current_user.username }}! 👋</h1>
+                <p>Gerencie seus serviços e encontre os melhores profissionais</p>
+                <div class="user-badge">
+                    <i class="fas fa-user"></i>
+                    <span>Cliente TxunaJob</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Estatísticas -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-tools"></i>
+                </div>
+                <div class="stat-number">3</div>
+                <div class="stat-label">Serviços Ativos</div>
+            </div>
+            <div class="stat-card orange">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number">2</div>
+                <div class="stat-label">Em Andamento</div>
+            </div>
+            <div class="stat-card green">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number">5</div>
+                <div class="stat-label">Concluídos</div>
+            </div>
+            <div class="stat-card purple">
+                <div class="stat-icon">
+                    <i class="fas fa-comments"></i>
+                </div>
+                <div class="stat-number">7</div>
+                <div class="stat-label">Mensagens</div>
+            </div>
+        </div>
+
+        <!-- Conteúdo Principal -->
+        <div class="dashboard-grid">
+            <!-- Coluna Principal -->
+            <div class="dashboard-main">
+                <!-- Ações Rápidas -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-bolt"></i> Ações Rápidas</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="quick-actions">
+                            <a href="{{ url_for('services') }}" class="action-btn">
+                                <i class="fas fa-search"></i>
+                                <span>Buscar Profissionais</span>
+                            </a>
+                            <a href="#" class="action-btn">
+                                <i class="fas fa-plus"></i>
+                                <span>Novo Serviço</span>
+                            </a>
+                            <a href="#" class="action-btn">
+                                <i class="fas fa-comments"></i>
+                                <span>Chat</span>
+                            </a>
+                            <a href="#" class="action-btn">
+                                <i class="fas fa-star"></i>
+                                <span>Avaliações</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Serviços Recentes -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-list"></i> Serviços Recentes</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="service-list">
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title">Reparo Elétrico - Sala</h3>
+                                    <span class="service-date">15 Dez 2024</span>
+                                </div>
+                                <p class="service-description">Instalação de tomadas e pontos de luz na sala de estar</p>
+                                <span class="service-status status-in-progress">Em Andamento</span>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title">Pintura - Quarto</h3>
+                                    <span class="service-date">10 Dez 2024</span>
+                                </div>
+                                <p class="service-description">Pintura completa do quarto principal</p>
+                                <span class="service-status status-completed">Concluído</span>
+                            </div>
+                            <div class="service-item">
+                                <div class="service-header">
+                                    <h3 class="service-title">Encanamento - Cozinha</h3>
+                                    <span class="service-date">05 Dez 2024</span>
+                                </div>
+                                <p class="service-description">Reparo no vazamento da pia da cozinha</p>
+                                <span class="service-status status-pending">Aguardando</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="dashboard-sidebar">
+                <!-- Mensagens Recentes -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-envelope"></i> Mensagens</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="message-list">
+                            <div class="message-item">
+                                <div class="message-header">
+                                    <h3 class="message-sender">João - Eletricista</h3>
+                                    <span class="message-time">10:30</span>
+                                </div>
+                                <p class="message-preview">Olá! Posso começar o serviço amanhã às 9h...</p>
+                            </div>
+                            <div class="message-item">
+                                <div class="message-header">
+                                    <h3 class="message-sender">Maria - Pintora</h3>
+                                    <span class="message-time">Ontem</span>
+                                </div>
+                                <p class="message-preview">O material já chegou, podemos marcar...</p>
+                            </div>
+                            <div class="message-item">
+                                <div class="message-header">
+                                    <h3 class="message-sender">Carlos - Encanador</h3>
+                                    <span class="message-time">05 Dez</span>
+                                </div>
+                                <p class="message-preview">Preciso verificar o vazamento pessoalmente...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profissionais Favoritos -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-heart"></i> Favoritos</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="empty-state">
+                            <i class="fas fa-heart"></i>
+                            <h3>Nenhum favorito</h3>
+                            <p>Adicione profissionais aos seus favoritos</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

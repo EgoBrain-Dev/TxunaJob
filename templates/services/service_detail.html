@@ -1,0 +1,339 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes do Serviço - TxunaJob{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/services.css') }}">
+<style>
+    .service-detail-hero {
+        background: linear-gradient(135deg, var(--primary-blue) 0%, #0099cc 100%);
+        color: white;
+        padding: 3rem 0;
+    }
+
+    .service-detail-container {
+        padding: 3rem 0;
+    }
+
+    .service-detail-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 3rem;
+    }
+
+    .service-gallery {
+        margin-bottom: 2rem;
+    }
+
+    .main-image {
+        width: 100%;
+        height: 400px;
+        background: var(--card-background);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: var(--primary-blue);
+        margin-bottom: 1rem;
+    }
+
+    .image-thumbnails {
+        display: flex;
+        gap: 1rem;
+        overflow-x: auto;
+    }
+
+    .thumbnail {
+        width: 80px;
+        height: 80px;
+        background: var(--card-background);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: var(--primary-blue);
+        cursor: pointer;
+        flex-shrink: 0;
+    }
+
+    .service-info h1 {
+        font-size: 2.2rem;
+        color: var(--dark-text);
+        margin-bottom: 1rem;
+    }
+
+    .service-meta-detail {
+        display: flex;
+        gap: 2rem;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--dark-text);
+        opacity: 0.8;
+    }
+
+    .service-description-detail {
+        line-height: 1.7;
+        color: var(--dark-text);
+        margin-bottom: 2rem;
+        font-size: 1.1rem;
+    }
+
+    .service-features {
+        margin-bottom: 2rem;
+    }
+
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .feature-item {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem;
+        background: var(--card-background);
+        border-radius: 8px;
+    }
+
+    .feature-item i {
+        color: var(--primary-blue);
+        font-size: 1.2rem;
+    }
+
+    /* Sidebar de Ação */
+    .action-sidebar {
+        position: sticky;
+        top: 2rem;
+    }
+
+    .action-card {
+        background: var(--background-light);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .price-display {
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .price-amount {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--primary-orange);
+        margin-bottom: 0.5rem;
+    }
+
+    .price-note {
+        color: var(--dark-text);
+        opacity: 0.7;
+        font-size: 0.9rem;
+    }
+
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .professional-card {
+        text-align: center;
+        padding: 1.5rem;
+        background: var(--card-background);
+        border-radius: 12px;
+    }
+
+    .professional-avatar-large {
+        width: 80px;
+        height: 80px;
+        background: var(--primary-blue);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2rem;
+        margin: 0 auto 1rem;
+    }
+
+    /* Tema Escuro */
+    .dark-theme .action-card,
+    .dark-theme .professional-card {
+        background: var(--dark-card);
+    }
+
+    .dark-theme .feature-item {
+        background: var(--dark-bg);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="service-detail-hero">
+    <div class="container">
+        <div style="text-align: center;">
+            <h1>Instalação Elétrica Residencial</h1>
+            <p>Serviço profissional com garantia e certificação</p>
+        </div>
+    </div>
+</section>
+
+<!-- Detalhes do Serviço -->
+<section class="service-detail-container">
+    <div class="container">
+        <div class="service-detail-grid">
+            <!-- Conteúdo Principal -->
+            <div class="service-main-content">
+                <!-- Galeria -->
+                <div class="service-gallery">
+                    <div class="main-image">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="image-thumbnails">
+                        <div class="thumbnail">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="thumbnail">
+                            <i class="fas fa-image"></i>
+                        </div>
+                        <div class="thumbnail">
+                            <i class="fas fa-image"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações do Serviço -->
+                <div class="service-info">
+                    <h1>Instalação Elétrica Residencial Completa</h1>
+                    
+                    <div class="service-meta-detail">
+                        <div class="meta-item">
+                            <i class="fas fa-star"></i>
+                            <span>4.8 (24 avaliações)</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span>2-3 dias</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Maputo e Arredores</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Garantia de 1 ano</span>
+                        </div>
+                    </div>
+
+                    <div class="service-description-detail">
+                        <p>Serviço completo de instalação elétrica residencial, incluindo quadro de distribuição, pontos de luz, tomadas, interruptores e aterramento. Utilizamos materiais de alta qualidade e seguimos todas as normas de segurança.</p>
+                        
+                        <p>O serviço inclui:</p>
+                        <ul>
+                            <li>Instalação do quadro elétrico com disjuntores</li>
+                            <li>Pontos de luz em todos os cômodos</li>
+                            <li>Tomadas elétricas nas posições necessárias</li>
+                            <li>Sistema de aterramento</li>
+                            <li>Testes e certificação do sistema</li>
+                        </ul>
+                    </div>
+
+                    <div class="service-features">
+                        <h3 style="margin-bottom: 1rem;">O que está incluído</h3>
+                        <div class="features-grid">
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Materiais inclusos</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Mão de obra especializada</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Garantia de 1 ano</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Certificado de conformidade</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Limpeza pós-serviço</span>
+                            </div>
+                            <div class="feature-item">
+                                <i class="fas fa-check"></i>
+                                <span>Suporte pós-venda</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar de Ação -->
+            <div class="action-sidebar">
+                <div class="action-card">
+                    <div class="price-display">
+                        <div class="price-amount">1.500 MT</div>
+                        <div class="price-note">Preço fixo • Sem surpresas</div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary btn-full">
+                            <i class="fas fa-comments"></i> Contatar Profissional
+                        </button>
+                        <button class="btn btn-outline btn-full">
+                            <i class="fas fa-calendar"></i> Agendar Visita
+                        </button>
+                        <button class="btn btn-outline btn-full">
+                            <i class="fas fa-heart"></i> Adicionar Favoritos
+                        </button>
+                    </div>
+                    
+                    <div style="text-align: center; color: var(--dark-text); opacity: 0.7; font-size: 0.9rem;">
+                        <p><i class="fas fa-shield-alt"></i> Pagamento seguro via TxunaJob</p>
+                    </div>
+                </div>
+
+                <!-- Card do Profissional -->
+                <div class="professional-card">
+                    <div class="professional-avatar-large">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3>João Matavel</h3>
+                    <p style="color: var(--primary-blue); margin-bottom: 1rem;">Eletricista Profissional</p>
+                    
+                    <div class="rating-display" style="justify-content: center; margin-bottom: 1rem;">
+                        <i class="fas fa-star"></i>
+                        <span>4.8 (24 avaliações)</span>
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <p style="margin: 0.5rem 0;"><i class="fas fa-briefcase"></i> 5 anos de experiência</p>
+                        <p style="margin: 0.5rem 0;"><i class="fas fa-map-marker-alt"></i> Maputo, Moçambique</p>
+                        <p style="margin: 0.5rem 0;"><i class="fas fa-check-circle"></i> 42 serviços concluídos</p>
+                    </div>
+                    
+                    <button class="btn btn-outline btn-full">
+                        <i class="fas fa-eye"></i> Ver Perfil Completo
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

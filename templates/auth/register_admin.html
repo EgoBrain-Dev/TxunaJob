@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Registro Admin - TxunaJob{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/auth.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1><i class="fas fa-shield-alt"></i> Registro Administrador</h1>
+            <p>Crie uma conta de administrador para a plataforma</p>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" action="{{ url_for('register_admin') }}" class="auth-form">
+            <div class="form-group">
+                <label for="username"><i class="fas fa-user"></i> Nome de Usuário *</label>
+                <input type="text" id="username" name="username" required 
+                       placeholder="Nome de usuário único">
+            </div>
+
+            <div class="form-group">
+                <label for="email"><i class="fas fa-envelope"></i> Email *</label>
+                <input type="email" id="email" name="email" required 
+                       placeholder="admin@txunajob.com">
+            </div>
+
+            <div class="form-group">
+                <label for="full_name"><i class="fas fa-id-card"></i> Nome Completo *</label>
+                <input type="text" id="full_name" name="full_name" required 
+                       placeholder="Seu nome completo">
+            </div>
+
+            <div class="form-group">
+                <label for="password"><i class="fas fa-lock"></i> Senha *</label>
+                <input type="password" id="password" name="password" required 
+                       placeholder="Senha segura para administrador">
+            </div>
+
+            <div class="form-group">
+                <label for="admin_key"><i class="fas fa-key"></i> Chave de Administrador *</label>
+                <input type="password" id="admin_key" name="admin_key" required 
+                       placeholder="Chave secreta de administração">
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full">
+                <i class="fas fa-shield-alt"></i> Criar Conta Admin
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p><strong>Atenção:</strong> Esta área é restrita para administradores autorizados.</p>
+            <p>Voltar para <a href="{{ url_for('index') }}">página inicial</a></p>
+        </div>
+    </div>
+</div>
+{% endblock %}

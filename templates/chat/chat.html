@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+
+{% block title %}Chat - TxunaJob{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/chat.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="chat-page-container">
+    <div class="chat-header-section">
+        <div class="container">
+            <h1><i class="fas fa-comments"></i> Mensagens</h1>
+            <p>Converse com clientes e profissionais</p>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="chat-main-container">
+            <!-- Sidebar de Conversas -->
+            <div class="chat-sidebar">
+                <div class="chat-sidebar-header">
+                    <h2>Conversas</h2>
+                    <button class="btn btn-primary btn-sm" onclick="startNewConversation()">
+                        <i class="fas fa-plus"></i> Nova
+                    </button>
+                </div>
+                
+                <div class="chat-search">
+                    <input type="text" placeholder="Buscar conversas...">
+                </div>
+                
+                <div class="conversation-list">
+                    <!-- Conversa 1 -->
+                    <div class="conversation-item active">
+                        <div class="conversation-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="conversation-info">
+                            <div class="conversation-header">
+                                <h3>João Matavel</h3>
+                                <span class="conversation-time">10:30</span>
+                            </div>
+                            <p class="conversation-preview">Olá! Posso começar o serviço amanhã às 9h...</p>
+                            <span class="unread-badge">3</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Conversa 2 -->
+                    <div class="conversation-item">
+                        <div class="conversation-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="conversation-info">
+                            <div class="conversation-header">
+                                <h3>Maria Santos</h3>
+                                <span class="conversation-time">Ontem</span>
+                            </div>
+                            <p class="conversation-preview">O material já chegou, podemos marcar...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Conversa 3 -->
+                    <div class="conversation-item">
+                        <div class="conversation-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div class="conversation-info">
+                            <div class="conversation-header">
+                                <h3>Carlos Muchanga</h3>
+                                <span class="conversation-time">05 Dez</span>
+                            </div>
+                            <p class="conversation-preview">Preciso verificar o vazamento pessoalmente...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Área de Mensagens -->
+            <div class="chat-messages-area">
+                <div class="chat-messages-header">
+                    <div class="current-chat-info">
+                        <div class="chat-avatar">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <h3>João Matavel</h3>
+                            <p class="chat-status">Eletricista • Online</p>
+                        </div>
+                    </div>
+                    <div class="chat-actions">
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-phone"></i>
+                        </button>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-video"></i>
+                        </button>
+                        <button class="btn btn-outline btn-sm">
+                            <i class="fas fa-ellipsis-v"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="messages-container">
+                    <!-- Mensagens -->
+                    <div class="message received">
+                        <div class="message-content">
+                            <p class="message-text">Olá! Gostaria de saber se você está disponível para um serviço de instalação elétrica.</p>
+                            <span class="message-time">10:15</span>
+                        </div>
+                    </div>
+                    
+                    <div class="message sent">
+                        <div class="message-content">
+                            <p class="message-text">Bom dia! Sim, estou disponível. Pode me dar mais detalhes sobre o serviço?</p>
+                            <span class="message-time">10:18</span>
+                        </div>
+                    </div>
+                    
+                    <div class="message received">
+                        <div class="message-content">
+                            <p class="message-text">Preciso instalar o quadro elétrico e pontos de luz na minha nova casa. São 3 quartos, sala e cozinha.</p>
+                            <span class="message-time">10:22</span>
+                        </div>
+                    </div>
+                    
+                    <div class="message sent">
+                        <div class="message-content">
+                            <p class="message-text">Perfeito! Posso fazer uma visita técnica hoje à tarde para ver o local e passar o orçamento.</p>
+                            <span class="message-time">10:25</span>
+                        </div>
+                    </div>
+                    
+                    <div class="message received">
+                        <div class="message-content">
+                            <p class="message-text">Excelente! Que horas você pode vir? Posso estar em casa a partir das 14h.</p>
+                            <span class="message-time">10:30</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="message-input-container">
+                    <div class="message-input">
+                        <button class="attach-btn">
+                            <i class="fas fa-paperclip"></i>
+                        </button>
+                        <input type="text" placeholder="Digite sua mensagem...">
+                        <button class="send-btn btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+{% endblock %}

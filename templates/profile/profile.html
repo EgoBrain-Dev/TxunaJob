@@ -1,0 +1,271 @@
+{% extends "base.html" %}
+
+{% block title %}Meu Perfil - TxunaJob{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="profile-container">
+    <!-- Header do Perfil -->
+    <div class="profile-header">
+        <div class="container">
+            <div class="profile-hero">
+                <div class="profile-avatar">
+                    <div class="avatar-image">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="profile-badge">
+                        {% if current_user.user_type == 'professional' %}
+                        <i class="fas fa-briefcase"></i> Profissional
+                        {% else %}
+                        <i class="fas fa-user"></i> Cliente
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="profile-info">
+                    <h1>{{ current_user.username }}</h1>
+                    <p class="profile-email">
+                        <i class="fas fa-envelope"></i> {{ current_user.email }}
+                    </p>
+                    {% if current_user.location %}
+                    <p class="profile-location">
+                        <i class="fas fa-map-marker-alt"></i> {{ current_user.location }}
+                    </p>
+                    {% endif %}
+                    {% if current_user.user_type == 'professional' and current_user.professional_profile %}
+                    <div class="specialty-display">
+                        <i class="fas fa-tools"></i> {{ current_user.professional_profile.specialty }}
+                        {% if current_user.professional_profile.experience %}
+                        <span class="experience-badge">{{ current_user.professional_profile.experience }} anos exp.</span>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="profile-actions">
+                    <button class="btn btn-outline">
+                        <i class="fas fa-edit"></i> Editar Perfil
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-camera"></i> Alterar Foto
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="profile-grid">
+            <!-- Coluna Principal -->
+            <div class="profile-main">
+                <!-- Informações Pessoais -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-circle"></i> Informações Pessoais</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item">
+                                <label>Nome Completo</label>
+                                <p>{{ current_user.professional_profile.full_name if current_user.user_type == 'professional' and current_user.professional_profile else current_user.username }}</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Telefone</label>
+                                <p>{{ current_user.phone if current_user.phone else 'Não informado' }}</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Email</label>
+                                <p>{{ current_user.email }}</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Localização</label>
+                                <p>{{ current_user.location if current_user.location else 'Não informada' }}</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Tipo de Conta</label>
+                                <p>
+                                    {% if current_user.user_type == 'professional' %}
+                                    <span class="badge professional">Profissional</span>
+                                    {% else %}
+                                    <span class="badge client">Cliente</span>
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="info-item">
+                                <label>Membro desde</label>
+                                <p>{{ current_user.created_at.strftime('%d/%m/%Y') if current_user.created_at else 'Data não disponível' }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Informações Profissionais (apenas para profissionais) -->
+                {% if current_user.user_type == 'professional' and current_user.professional_profile %}
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-briefcase"></i> Informações Profissionais</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="info-grid">
+                            <div class="info-item full-width">
+                                <label>Especialidade</label>
+                                <p>{{ current_user.professional_profile.specialty }}</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Experiência</label>
+                                <p>{{ current_user.professional_profile.experience }} anos</p>
+                            </div>
+                            <div class="info-item">
+                                <label>Status</label>
+                                <p>
+                                    <span class="badge {% if current_user.professional_profile.is_verified %}verified{% else %}pending{% endif %}">
+                                        {% if current_user.professional_profile.is_verified %}
+                                        <i class="fas fa-check-circle"></i> Verificado
+                                        {% else %}
+                                        <i class="fas fa-clock"></i> Em Análise
+                                        {% endif %}
+                                    </span>
+                                </p>
+                            </div>
+                        </div>
+                        {% if current_user.professional_profile.description %}
+                        <div class="description-section">
+                            <label>Sobre mim</label>
+                            <p class="profile-description">{{ current_user.professional_profile.description }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Estatísticas -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-chart-bar"></i> Estatísticas</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="stats-grid">
+                            {% if current_user.user_type == 'professional' %}
+                            <div class="stat-item">
+                                <div class="stat-number">24</div>
+                                <div class="stat-label">Serviços Concluídos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">4.8</div>
+                                <div class="stat-label">Avaliação Média</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">18</div>
+                                <div class="stat-label">Clientes Atendidos</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">95%</div>
+                                <div class="stat-label">Taxa de Sucesso</div>
+                            </div>
+                            {% else %}
+                            <div class="stat-item">
+                                <div class="stat-number">8</div>
+                                <div class="stat-label">Serviços Contratados</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">5</div>
+                                <div class="stat-label">Profissionais</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">12</div>
+                                <div class="stat-label">Avaliações Feitas</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number">100%</div>
+                                <div class="stat-label">Satisfação</div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="profile-sidebar">
+                <!-- Ações Rápidas -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-cog"></i> Configurações</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="settings-list">
+                            <a href="#" class="setting-item">
+                                <i class="fas fa-lock"></i>
+                                <span>Alterar Senha</span>
+                            </a>
+                            <a href="#" class="setting-item">
+                                <i class="fas fa-bell"></i>
+                                <span>Notificações</span>
+                            </a>
+                            <a href="#" class="setting-item">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Privacidade</span>
+                            </a>
+                            <a href="#" class="setting-item">
+                                <i class="fas fa-credit-card"></i>
+                                <span>Métodos de Pagamento</span>
+                            </a>
+                            <a href="#" class="setting-item">
+                                <i class="fas fa-question-circle"></i>
+                                <span>Ajuda & Suporte</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verificação (apenas para profissionais) -->
+                {% if current_user.user_type == 'professional' %}
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-check-circle"></i> Verificação</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="verification-status">
+                            {% if current_user.professional_profile.is_verified %}
+                            <div class="verified-badge">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Conta Verificada</span>
+                            </div>
+                            <p>Seu perfil foi verificado e está ativo para receber serviços.</p>
+                            {% else %}
+                            <div class="pending-badge">
+                                <i class="fas fa-clock"></i>
+                                <span>Em Verificação</span>
+                            </div>
+                            <p>Seu perfil está em análise. Isso pode levar até 48 horas.</p>
+                            <button class="btn btn-primary btn-full">
+                                <i class="fas fa-upload"></i> Enviar Documentos
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Conta -->
+                <div class="profile-card">
+                    <div class="card-header">
+                        <h2><i class="fas fa-user-cog"></i> Conta</h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="account-actions">
+                            <button class="btn btn-outline btn-full">
+                                <i class="fas fa-download"></i> Exportar Dados
+                            </button>
+                            <button class="btn btn-outline btn-full" style="color: var(--alert-red); border-color: var(--alert-red);">
+                                <i class="fas fa-trash"></i> Excluir Conta
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

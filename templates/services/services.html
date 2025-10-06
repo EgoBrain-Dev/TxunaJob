@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Serviços - TxunaJob{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/services.css') }}">
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="services-hero">
+    <div class="container">
+        <h1>Encontre os Melhores Profissionais</h1>
+        <p>Descubra serviços de qualidade perto de você</p>
+        
+        <div class="search-container">
+            <div class="search-box">
+                <input type="text" placeholder="Qual serviço você precisa? Ex: eletricista, pintor...">
+                <button>
+                    <i class="fas fa-search"></i> Buscar
+                </button>
+            </div>
+            
+            <div class="filter-tags">
+                <span class="filter-tag active">Todos</span>
+                <span class="filter-tag">Eletricista</span>
+                <span class="filter-tag">Encanador</span>
+                <span class="filter-tag">Pintor</span>
+                <span class="filter-tag">Pedreiro</span>
+                <span class="filter-tag">Marceneiro</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Lista de Serviços -->
+<section class="container">
+    <div class="services-grid">
+        <!-- Serviço 1 -->
+        <div class="service-card">
+            <div class="service-image">
+                <i class="fas fa-bolt"></i>
+            </div>
+            <div class="service-content">
+                <span class="service-category">ELETRICISTA</span>
+                <h3 class="service-title">Instalação Elétrica Residencial</h3>
+                <p class="service-description">
+                    Instalação completa do quadro elétrico, pontos de luz e tomadas. 
+                    Serviço garantido e com certificação.
+                </p>
+                
+                <div class="service-meta">
+                    <span class="service-price">1.500 MT</span>
+                    <div class="service-rating">
+                        <i class="fas fa-star"></i>
+                        <span>4.8 (24)</span>
+                    </div>
+                </div>
+                
+                <div class="service-professional">
+                    <div class="professional-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="professional-info">
+                        <h4>João Matavel</h4>
+                        <p>5 anos de experiência</p>
+                    </div>
+                </div>
+                
+                <div class="service-actions">
+                    <a href="{{ url_for('service_detail', service_id=1) }}" class="btn btn-outline">
+                        <i class="fas fa-info-circle"></i> Detalhes
+                    </a>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-comments"></i> Contatar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Serviço 2 -->
+        <div class="service-card">
+            <div class="service-image">
+                <i class="fas fa-paint-roller"></i>
+            </div>
+            <div class="service-content">
+                <span class="service-category">PINTURA</span>
+                <h3 class="service-title">Pintura de Apartamentos</h3>
+                <p class="service-description">
+                    Pintura interna e externa de alta qualidade. 
+                    Uso de tintas premium e técnicas profissionais.
+                </p>
+                
+                <div class="service-meta">
+                    <span class="service-price">800 MT</span>
+                    <div class="service-rating">
+                        <i class="fas fa-star"></i>
+                        <span>4.9 (18)</span>
+                    </div>
+                </div>
+                
+                <div class="service-professional">
+                    <div class="professional-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="professional-info">
+                        <h4>Maria Santos</h4>
+                        <p>3 anos de experiência</p>
+                    </div>
+                </div>
+                
+                <div class="service-actions">
+                    <a href="{{ url_for('service_detail', service_id=2) }}" class="btn btn-outline">
+                        <i class="fas fa-info-circle"></i> Detalhes
+                    </a>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-comments"></i> Contatar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Serviço 3 -->
+        <div class="service-card">
+            <div class="service-image">
+                <i class="fas fa-tools"></i>
+            </div>
+            <div class="service-content">
+                <span class="service-category">ENCANAMENTO</span>
+                <h3 class="service-title">Reparo de Vazamentos</h3>
+                <p class="service-description">
+                    Reparo rápido e eficiente de vazamentos em tubulações. 
+                    Diagnóstico gratuito e orçamento sem compromisso.
+                </p>
+                
+                <div class="service-meta">
+                    <span class="service-price">600 MT</span>
+                    <div class="service-rating">
+                        <i class="fas fa-star"></i>
+                        <span>4.7 (31)</span>
+                    </div>
+                </div>
+                
+                <div class="service-professional">
+                    <div class="professional-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="professional-info">
+                        <h4>Carlos Muchanga</h4>
+                        <p>7 anos de experiência</p>
+                    </div>
+                </div>
+                
+                <div class="service-actions">
+                    <a href="{{ url_for('service_detail', service_id=3) }}" class="btn btn-outline">
+                        <i class="fas fa-info-circle"></i> Detalhes
+                    </a>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-comments"></i> Contatar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Serviço 4 -->
+        <div class="service-card">
+            <div class="service-image">
+                <i class="fas fa-hammer"></i>
+            </div>
+            <div class="service-content">
+                <span class="service-category">PEDREIRO</span>
+                <h3 class="service-title">Construção de Muros</h3>
+                <p class="service-description">
+                    Construção e reparo de muros de alvenaria. 
+                    Materiais de qualidade e acabamento profissional.
+                </p>
+                
+                <div class="service-meta">
+                    <span class="service-price">2.200 MT</span>
+                    <div class="service-rating">
+                        <i class="fas fa-star"></i>
+                        <span>4.6 (15)</span>
+                    </div>
+                </div>
+                
+                <div class="service-professional">
+                    <div class="professional-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="professional-info">
+                        <h4>António Sitoe</h4>
+                        <p>8 anos de experiência</p>
+                    </div>
+                </div>
+                
+                <div class="service-actions">
+                    <a href="{{ url_for('service_detail', service_id=4) }}" class="btn btn-outline">
+                        <i class="fas fa-info-circle"></i> Detalhes
+                    </a>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-comments"></i> Contatar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
