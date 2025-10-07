@@ -561,7 +561,6 @@ document.addEventListener('DOMContentLoaded', function() {
 window.TxunaJobApp = TxunaJobApp;
 window.ProfessionalsSystem = ProfessionalsSystem;
 
-
 // Funções para os modais
 function showLoginModal() {
     document.getElementById('loginModal').classList.remove('hidden');

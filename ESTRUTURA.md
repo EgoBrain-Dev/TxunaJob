@@ -1,38 +1,38 @@
-TxunaJob/
-│
-├── README.md                # Documentação do projeto
-├── LICENSE.md               # Licença do projeto
-├── .env                     # Variáveis de ambiente (ex.: SECRET_KEY, DB_PATH)
-│
-├── frontend/                # Tudo relacionado ao frontend
-│   ├── index.html           # Página principal
-│   ├── login.html           # Tela de login
-│   ├── register.html        # Tela de registro
-│   ├── css/
-│   │   └── style.css        # Todos os estilos (já tem seu CSS)
-│   ├── js/
-│   │   └── script.js        # Toda a lógica JS da interface
-│   ├── assets/              # Imagens, ícones, fontes
-│   │   ├── images/
-│   │   └── fonts/
-│   └── components/          # Fragmentos HTML reutilizáveis (header, footer, modais)
-│       ├── header.html
-│       └── footer.html
-│
-├── backend/                 # Backend Flask + banco de dados
-│   ├── app.py               # Arquivo principal Flask
-│   ├── config.py            # Configurações do Flask e DB
-│   ├── routes/              # Rotas do Flask
-│   │   ├── auth_routes.py   # Login, registro, logout
-│   │   ├── main_routes.py   # Rotas da página inicial, features, etc
-│   │   └── api_routes.py    # APIs para AJAX / chat / notificações
-│   ├── models/              # Modelos do banco de dados
-│   │   └── user.py          # Ex.: tabela de usuários
-│   ├── static/              # Flask precisa dessa pasta para servir CSS/JS/assets
-│   │   ├── css/             # link para frontend/css
-│   │   ├── js/              # link para frontend/js
-│   │   └── images/          # link para frontend/assets/images
-│   └── database/
-│       └── txunajob.db      # Banco de dados SQLite
-│
-└── requirements.txt         # Dependências Python (Flask, Flask-Login, etc)
+txunajob/
+├──app.py                 # Aplicação Flask principal
+├──requirements.txt       # Dependências Python
+├──vercel.json           # Configuração Vercel
+├──wsgi.py               # WSGI entry point
+├──static/
+│├── css/
+││   ├── styles.css    # Estilos principais
+││   ├── auth.css      # Páginas de autenticação
+││   ├── dashboard.css # Dashboards
+││   ├── services.css  # Páginas de serviços
+││   ├── profile.css   # Perfil do usuário
+││   └── chat.css      # Interface de chat
+│└── js/
+│├── script.js     # JavaScript principal
+│├── auth.js       # Autenticação
+│└── chat.js       # Sistema de chat
+├──templates/
+│├── base.html         # Template base
+│├── index.html        # Página inicial
+│├── auth/             # Autenticação
+││   ├── login.html
+││   ├── register_client.html
+││   └── register_pro.html
+│├── dashboards/       # Dashboards
+││   ├── client_dashboard.html
+││   └── professional_dashboard.html
+│├── services/         # Serviços
+││   ├── services.html
+││   └── service_detail.html
+│├── chat/             # Chat
+││   └── chat.html
+│└── profile/          # Perfil
+│└── profile.html
+├──models/
+│└── init.py       # Modelos de dados
+└──instance/
+└── app.db           # Database SQLite

@@ -1,20 +1,19 @@
 /**
- * register_pro.js - JavaScript específico para registro profissional
- * Validações e interações do formulário de cadastro profissional
+ * register_client.js - JavaScript específico para registro de cliente
+ * Validações e interações do formulário de cadastro de cliente
  * Autor: EgoBrain-Dev
  * Versão: 1.1.0
  */
 
-class RegisterProfessionalSystem {
+class RegisterClientSystem {
     static init() {
         this.setupFormValidation();
         this.setupPasswordStrength();
         this.setupPasswordToggle();
         this.setupPasswordMatch();
-        this.setupTermsValidation();
         this.setupRealTimeValidation();
-        this.setupSpecialtyHandler();
         this.setupLicenseToggle();
+        this.setupTermsValidation();
     }
 
     /**
@@ -104,42 +103,6 @@ class RegisterProfessionalSystem {
     }
 
     /**
-     * Configura validação dos termos
-     */
-    static setupTermsValidation() {
-        const termsCheckbox = document.getElementById('agree_terms');
-        const submitBtn = document.getElementById('submitBtn');
-
-        if (termsCheckbox && submitBtn) {
-            termsCheckbox.addEventListener('change', (e) => {
-                submitBtn.disabled = !e.target.checked;
-            });
-        }
-    }
-
-    /**
-     * Configura handler para especialidade personalizada
-     */
-    static setupSpecialtyHandler() {
-        const specialtySelect = document.getElementById('specialty');
-        const customSpecialtyGroup = document.getElementById('customSpecialtyGroup');
-        const customSpecialtyInput = document.getElementById('custom_specialty');
-
-        if (specialtySelect && customSpecialtyGroup) {
-            specialtySelect.addEventListener('change', (e) => {
-                if (e.target.value === 'Outro') {
-                    customSpecialtyGroup.classList.remove('hidden');
-                    customSpecialtyInput.setAttribute('required', 'required');
-                } else {
-                    customSpecialtyGroup.classList.add('hidden');
-                    customSpecialtyInput.removeAttribute('required');
-                    customSpecialtyInput.value = '';
-                }
-            });
-        }
-    }
-
-    /**
      * Configura toggle da licença
      */
     static setupLicenseToggle() {
@@ -153,6 +116,20 @@ class RegisterProfessionalSystem {
                 licenseContent.classList.toggle('hidden');
                 toggleText.textContent = licenseContent.classList.contains('hidden') ? 'Mostrar termos' : 'Ocultar termos';
                 toggleIcon.className = licenseContent.classList.contains('hidden') ? 'fas fa-chevron-down' : 'fas fa-chevron-up';
+            });
+        }
+    }
+
+    /**
+     * Configura validação dos termos
+     */
+    static setupTermsValidation() {
+        const termsCheckbox = document.getElementById('agree_terms');
+        const submitBtn = document.getElementById('submitBtn');
+
+        if (termsCheckbox && submitBtn) {
+            termsCheckbox.addEventListener('change', (e) => {
+                submitBtn.disabled = !e.target.checked;
             });
         }
     }
@@ -182,16 +159,6 @@ class RegisterProfessionalSystem {
         if (usernameInput) {
             usernameInput.addEventListener('blur', (e) => {
                 this.validateUsername(e.target.value);
-            });
-        }
-
-        // Validação de especialidade personalizada
-        const customSpecialtyInput = document.getElementById('custom_specialty');
-        if (customSpecialtyInput) {
-            customSpecialtyInput.addEventListener('blur', (e) => {
-                if (e.target.value.trim()) {
-                    this.toggleFieldValidation('custom_specialty', true, '');
-                }
             });
         }
     }
@@ -331,8 +298,7 @@ class RegisterProfessionalSystem {
      */
     static validateForm() {
         const requiredFields = [
-            'username', 'email', 'full_name', 'password', 'confirm_password',
-            'specialty', 'phone', 'location'
+            'username', 'email', 'full_name', 'password', 'confirm_password'
         ];
 
         let isValid = true;
@@ -345,14 +311,6 @@ class RegisterProfessionalSystem {
                 isValid = false;
             }
         });
-
-        // Valida especialidade personalizada se selecionada
-        const specialtySelect = document.getElementById('specialty');
-        const customSpecialtyInput = document.getElementById('custom_specialty');
-        if (specialtySelect && specialtySelect.value === 'Outro' && customSpecialtyInput && !customSpecialtyInput.value.trim()) {
-            this.toggleFieldValidation('custom_specialty', false, 'Por favor, especifique sua especialidade.');
-            isValid = false;
-        }
 
         // Valida correspondência de senhas
         const password = document.getElementById('password').value;
@@ -468,7 +426,7 @@ class RegisterProfessionalSystem {
 
 // Inicializar quando DOM carregar
 document.addEventListener('DOMContentLoaded', function() {
-    RegisterProfessionalSystem.init();
+    RegisterClientSystem.init();
 });
 
 // Adicionar estilos para validação e notificações

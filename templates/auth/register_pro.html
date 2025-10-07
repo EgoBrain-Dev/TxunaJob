@@ -2,6 +2,10 @@
 
 {% block title %}Cadastro Profissional - TxunaJob{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/register_pro.css') }}">
+{% endblock %}
+
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/register_pro.js') }}"></script>
 {% endblock %}
@@ -27,7 +31,7 @@
             {% endif %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('register_professional') }}" class="auth-form">
+        <form method="POST" action="{{ url_for('register_professional') }}" class="auth-form" id="registrationForm">
             <div class="form-group">
                 <label for="username"><i class="fas fa-user"></i> Nome de Usuário *</label>
                 <input type="text" id="username" name="username" required 
@@ -46,10 +50,37 @@
                        placeholder="Seu nome completo">
             </div>
 
-            <div class="form-group">
-                <label for="password"><i class="fas fa-lock"></i> Senha *</label>
-                <input type="password" id="password" name="password" required 
-                       placeholder="Crie uma senha segura">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="password"><i class="fas fa-lock"></i> Senha *</label>
+                    <div class="password-input-container">
+                        <input type="password" id="password" name="password" required 
+                               placeholder="Crie uma senha segura">
+                        <button type="button" class="password-toggle" id="passwordToggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-strength">
+                        <div class="strength-bar">
+                            <div class="strength-bar-inner"></div>
+                        </div>
+                        <span class="strength-text">Digite sua senha</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirm_password"><i class="fas fa-lock"></i> Confirmar Senha *</label>
+                    <div class="password-input-container">
+                        <input type="password" id="confirm_password" name="confirm_password" required 
+                               placeholder="Confirme sua senha">
+                        <button type="button" class="password-toggle" id="confirmPasswordToggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="password-match" id="passwordMatch">
+                        <span class="match-text">As senhas devem coincidir</span>
+                    </div>
+                </div>
             </div>
 
             <div class="form-row">
@@ -77,6 +108,13 @@
                 </div>
             </div>
 
+            <!-- Campo para especialidade personalizada (aparece quando seleciona "Outro") -->
+            <div class="form-group hidden" id="customSpecialtyGroup">
+                <label for="custom_specialty"><i class="fas fa-edit"></i> Especifique sua especialidade *</label>
+                <input type="text" id="custom_specialty" name="custom_specialty" 
+                       placeholder="Digite sua especialidade...">
+            </div>
+
             <div class="form-row">
                 <div class="form-group">
                     <label for="phone"><i class="fas fa-phone"></i> Telefone *</label>
@@ -97,7 +135,139 @@
                           placeholder="Descreva seus serviços e especialidades..."></textarea>
             </div>
 
-            <button type="submit" class="btn btn-primary btn-full">
+            <!-- Seção da Licença (Colapsável) -->
+            <div class="license-section">
+                <div class="license-header">
+                    <h3><i class="fas fa-file-contract"></i> Termos e Condições</h3>
+                    <p>
+                        <button type="button" class="btn-link" id="toggleLicense">
+                            <span id="licenseToggleText">Mostrar termos</span>
+                            <i class="fas fa-chevron-down" id="licenseToggleIcon"></i>
+                        </button>
+                    </p>
+                </div>
+                
+                <div class="license-agreement hidden" id="licenseContent">
+                    <div class="license-content">
+                        <h4>ACORDO DE LICENÇA DE USUÁRIO FINAL (EULA)</h4>
+                        <p><strong>Plataforma:</strong> EgoBrain-Dev Licensing & Commerce Platform</p>
+                        <p><strong>Versão:</strong> 1.0 | <strong>Data de Vigência:</strong> 2025</p>
+                        
+                        <div class="license-highlights">
+                            <div class="license-point">
+                                <i class="fas fa-check-circle text-success"></i>
+                                <span><strong>DIREITOS DO USUÁRIO:</strong> Acesso à plataforma, aquisição de serviços, suporte técnico</span>
+                            </div>
+                            <div class="license-point">
+                                <i class="fas fa-ban text-danger"></i>
+                                <span><strong>RESTRIÇÕES:</strong> Não modificar, copiar ou redistribuir conteúdo do sistema</span>
+                            </div>
+                            <div class="license-point">
+                                <i class="fas fa-shield-alt text-primary"></i>
+                                <span><strong>PROPRIEDADE INTELECTUAL:</strong> EgoBrain-Dev detém todos os direitos sobre a plataforma</span>
+                            </div>
+                            <div class="license-point">
+                                <i class="fas fa-gavel text-warning"></i>
+                                <span><strong>LEI APLICÁVEL:</strong> Regido pelas leis da República de Moçambique</span>
+                            </div>
+                            <div class="license-point">
+                                <i class="fas fa-user-lock text-info"></i>
+                                <span><strong>PRIVACIDADE:</strong> Proteção de dados pessoais conforme lei aplicável</span>
+                            </div>
+                            <div class="license-point">
+                                <i class="fas fa-headset text-secondary"></i>
+                                <span><strong>SUPORTE:</strong> Atendimento por email, WhatsApp e telefone</span>
+                            </div>
+                        </div>
+
+                        <div class="license-full-text">
+                            <div class="license-section-item">
+                                <h5><i class="fas fa-bullseye"></i> 1. OBJETIVO E CONCESSÃO DE USO</h5>
+                                <p>Este Acordo de Licença do Usuário Final ("Acordo") é celebrado entre o Usuário e EgoBrain-Dev, empresa provedora de soluções tecnológicas, desenvolvimento de software, consultoria e licenciamento digital ("Licenciante").</p>
+                            </div>
+
+                            <div class="license-section-item">
+                                <h5><i class="fas fa-check-double"></i> 2. DIREITOS DO USUÁRIO</h5>
+                                <p>O Usuário pode: criar conta e aceder à plataforma oficial; adquirir e gerir licenças, serviços e produtos digitais; aceder ao painel de utilizador; solicitar parceria comercial; receber atualizações automáticas; solicitar suporte técnico.</p>
+                            </div>
+
+                            <div class="license-section-item">
+                                <h5><i class="fas fa-exclamation-triangle"></i> 3. RESTRIÇÕES DO USUÁRIO</h5>
+                                <p>O Usuário NÃO poderá: modificar, copiar ou redistribuir o conteúdo; realizar engenharia reversa; usar a marca sem autorização; vender acessos administrativos; aceder ao painel administrativo; utilizar para fins ilegais; partilhar credenciais; criar sistemas concorrentes.</p>
+                            </div>
+
+                            <div class="license-section-item">
+                                <h5><i class="fas fa-copyright"></i> 4. PROPRIEDADE INTELECTUAL</h5>
+                                <p>O Usuário reconhece que a EgoBrain-Dev detém todos os direitos sobre a marca, site oficial, plataforma, softwares, documentação, sistema de validação e algoritmos proprietários.</p>
+                            </div>
+
+                            <div class="license-section-item">
+                                <h5><i class="fas fa-shield"></i> 5. GARANTIAS E ISENÇÕES</h5>
+                                <p>A plataforma é fornecida "NO ESTADO EM QUE SE ENCONTRA", sem garantias de disponibilidade contínua, compatibilidade total, precisão absoluta, segurança inviolável ou performance otimizada.</p>
+                            </div>
+
+                            <div class="license-section-item">
+                                <h5><i class="fas fa-life-ring"></i> 6. SUPORTE E ATENDIMENTO</h5>
+                                <p><strong>Canais Oficiais:</strong> Email: egobrain.mz@gmail.com; WhatsApp: +258 84 361 7130; Site: https://egobrain-dev.vercel.app/</p>
+                                <p><strong>Horário:</strong> Segunda a Sexta: 08h00 - 17h00; Sábados: 09h00 - 12h00</p>
+                            </div>
+                        </div>
+
+                        <div class="license-contacts">
+                            <h5><i class="fas fa-address-card"></i> CONTACTOS OFICIAIS</h5>
+                            <div class="contact-item">
+                                <i class="fas fa-envelope"></i>
+                                <span>egobrain.mz@gmail.com</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fab fa-whatsapp"></i>
+                                <span>+258 84 361 7130</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-phone"></i>
+                                <span>+258 87 861 7130</span>
+                            </div>
+                            <div class="contact-item">
+                                <i class="fas fa-globe"></i>
+                                <span>https://egobrain-dev.vercel.app/</span>
+                            </div>
+                        </div>
+
+                        <div class="license-footer">
+                            <div class="company-info">
+                                <i class="fas fa-building"></i>
+                                <strong>EgoBrain-Dev - Soluções, Licenças & Consultoria Tecnológica</strong>
+                            </div>
+                            <p class="company-motto">Desenvolvendo o Futuro Digital de Moçambique</p>
+                            <div class="document-info">
+                                <span><i class="fas fa-file-alt"></i> EULA-1.0</span>
+                                <span><i class="fas fa-sync-alt"></i> 2025</span>
+                                <span><i class="fas fa-lock"></i> 1.0 - Vigente</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="license-actions">
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="agree_terms" name="agree_terms" required>
+                        <span class="checkmark"></span>
+                        <span class="checkbox-label">
+                            Li e concordo com os <strong>Termos e Condições</strong> e a <strong>Política de Privacidade</strong>
+                        </span>
+                    </label>
+                    
+                    <label class="checkbox-container">
+                        <input type="checkbox" id="agree_newsletter" name="agree_newsletter">
+                        <span class="checkmark"></span>
+                        <span class="checkbox-label">
+                            Desejo receber atualizações sobre novos serviços e promoções
+                        </span>
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full" id="submitBtn" disabled>
                 <i class="fas fa-briefcase"></i> Criar Conta Profissional
             </button>
         </form>
