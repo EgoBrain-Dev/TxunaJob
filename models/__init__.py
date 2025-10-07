@@ -6,8 +6,6 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
-print("📊 INICIANDO MODELOS DA BASE DE DADOS...")
-
 class User(UserMixin, db.Model):
     __tablename__ = 'users'
     
@@ -26,7 +24,6 @@ class User(UserMixin, db.Model):
     admin_profile = db.relationship('Admin', backref='user', uselist=False, lazy=True)
     
     def set_password(self, password):
-        print(f"🔐 DEFININDO SENHA PARA USUÁRIO: {self.username}")
         self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
@@ -73,8 +70,6 @@ class Admin(db.Model):
     def __repr__(self):
         return f'<Admin {self.user.username}>'
 
-print("✅ MODELOS DE USUÁRIO CRIADOS: User, Client, Professional, Admin")
-
 class Service(db.Model):
     __tablename__ = 'services'
     
@@ -90,8 +85,6 @@ class Service(db.Model):
     
     def __repr__(self):
         return f'<Service {self.title} - {self.category}>'
-
-print("✅ MODELO SERVICE CRIADO")
 
 class Chat(db.Model):
     __tablename__ = 'chats'
@@ -114,6 +107,3 @@ class Message(db.Model):
     content = db.Column(db.Text, nullable=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
     is_read = db.Column(db.Boolean, default=False)
-
-print("✅ MODELOS DE CHAT CRIADOS: Chat, Message")
-print("🎉 TODOS OS MODELOS DA BASE DE DADOS CONCLUÍDOS!")
