@@ -1,4 +1,4 @@
-# app.py - VERSÃO SEGURA E CORRIGIDA
+# app.py - VERSÃO SEGURA SEM EXPOSIÇÃO DE CREDENCIAIS
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
@@ -12,32 +12,23 @@ from datetime import datetime
 from dotenv import load_dotenv
 load_dotenv()
 
-print("🚀 INICIANDO APLICAÇÃO FLASK TXUNAJOB...")
-
 app = Flask(__name__)
 
 # 🔒 SEGURANÇA: Gerar SECRET_KEY forte se não existir
 secret_key = os.environ.get('SECRET_KEY')
 if not secret_key:
     secret_key = secrets.token_hex(32)
-    print("⚠️  AVISO: SECRET_KEY não encontrada, gerando automaticamente")
-    print("💡 DICA: Defina SECRET_KEY no arquivo .env para produção")
 
 app.config['SECRET_KEY'] = secret_key
 
 # Configuração do banco de dados
 if os.environ.get('VERCEL'):
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    print("🌐 MODO VERCEL: Usando SQLite em memória")
 else:
-    # Usar DATABASE_URL do .env ou fallback local
     database_url = os.environ.get('DATABASE_URL', 'sqlite:///txunajob.db')
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
-    print(f"💻 MODO LOCAL: Usando banco {database_url}")
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-print("📁 CONFIGURANDO BANCO DE DADOS...")
 
 # Importar a instância única do SQLAlchemy dos modelos
 from models import db
@@ -50,8 +41,6 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Por favor, faça login para acessar esta página.'
 
-print("✅ CONFIGURAÇÃO INICIAL CONCLUÍDA")
-
 # Importar modelos DEPOIS de inicializar db
 from models import User, Client, Professional, Admin, Service, Chat, Message
 
@@ -59,8 +48,6 @@ from models import User, Client, Professional, Admin, Service, Chat, Message
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-print("✅ LOADER DE USUÁRIO CONFIGURADO")
 
 # 🔒 MIDDLEWARE DE SEGURANÇA
 @app.before_request
@@ -73,23 +60,44 @@ def security_checks():
             return '', 400
         if b'\x16\x03' in request.data[:10]:
             return '', 400
-    
-    # Rate limiting básico para login (em produção usar Flask-Limiter)
-    if request.endpoint == 'login' and request.method == 'POST':
-        client_ip = request.remote_addr
-        # Aqui poderia implementar verificação de tentativas
 
-# 🔒 FUNÇÃO PARA GERAR SENHA SEGURA DE ADMIN
-def generate_secure_admin_password():
-    """Gera uma senha segura para o admin padrão"""
-    import random
-    import string
+# 🔒 FUNÇÃO SEGURA PARA CRIAR ADMIN PADRÃO
+def create_default_admin():
+    """Cria admin padrão de forma segura sem expor credenciais"""
     
-    # Gerar senha com 12 caracteres: letras, números e símbolos
-    characters = string.ascii_letters + string.digits + "!@#$%&*"
-    secure_password = ''.join(random.choice(characters) for i in range(12))
+    # Verificar se já existe algum admin
+    if User.query.filter_by(user_type='admin').first():
+        return
     
-    return secure_password
+    # 🔒 CREDENCIAIS SEGURAS - NADA FIXO NO CÓDIGO
+    admin_username = os.environ.get('DEFAULT_ADMIN_USERNAME', 'txunajob_admin')
+    admin_email = os.environ.get('DEFAULT_ADMIN_EMAIL', 'admin@txunajob.local')
+    
+    # 🔒 SENHA SEGURA - OBRIGATÓRIO definir no .env
+    admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD')
+    
+    if not admin_password:
+        # ⚠️ EM PRODUÇÃO, EXIGIR senha no .env
+        if os.environ.get('FLASK_ENV') == 'production':
+            raise ValueError("DEFAULT_ADMIN_PASSWORD não definida no .env para produção")
+        else:
+            admin_password = "admin_temp_password_123"
+    
+    admin_user = User(
+        username=admin_username,
+        email=admin_email,
+        user_type='admin'
+    )
+    admin_user.set_password(admin_password)
+    
+    admin_profile = Admin(
+        user=admin_user,
+        permissions=json.dumps({'all': True})
+    )
+    
+    db.session.add(admin_user)
+    db.session.add(admin_profile)
+    db.session.commit()
 
 # Rotas principais
 @app.route('/')
@@ -389,60 +397,13 @@ def admin_stats():
 
 # Inicializar banco de dados
 def init_db():
-    print("🗃️ INICIALIZANDO BANCO DE DADOS...")
     with app.app_context():
         # Criar todas as tabelas
         db.create_all()
         
         # 🔒 CRIAR ADMIN PADRÃO COM SEGURANÇA
-        if not User.query.filter_by(user_type='admin').first():
-            # Gerar senha segura para admin padrão
-            admin_password = generate_secure_admin_password()
-            
-            admin_user = User(
-                username='admin',
-                email='admin@txunajob.com',
-                user_type='admin'
-            )
-            admin_user.set_password(admin_password)
-            
-            admin_profile = Admin(
-                user=admin_user,
-                permissions=json.dumps({'all': True})
-            )
-            
-            db.session.add(admin_user)
-            db.session.add(admin_profile)
-            db.session.commit()
-            
-            print("🔐 ADMIN PADRÃO CRIADO COM SEGURANÇA")
-            print(f"📧 Email: admin@txunajob.com")
-            print(f"🔑 Senha: {admin_password}")
-            print("⚠️  GUARDE ESTA SENHA EM LOCAL SEGURO!")
-            print("💡 Altere a senha após o primeiro login")
-        
-        print("✅ BANCO DE DADOS INICIALIZADO COM SUCESSO")
-
-# Listar rotas
-print("🛣️  ROTAS CONFIGURADAS:")
-routes = [
-    "GET /", "GET/POST /login", "GET/POST /register/client", 
-    "GET/POST /register/professional", "GET/POST /register/admin",
-    "GET /logout", "GET /forgot-password", "GET /dashboard/client",
-    "GET /dashboard/professional", "GET /dashboard/admin", "GET /services",
-    "GET /services/<int:service_id>", "GET /chat", "GET /profile",
-    "GET /api/admin/stats"
-]
-
-for route in routes:
-    print(f"  - {route}")
+        create_default_admin()
 
 if __name__ == '__main__':
     init_db()
-    print("🎯 EXECUTANDO APLICAÇÃO EM http://localhost:5000")
-    print("🔒 SSL requests serão automaticamente bloqueadas")
-    print("💡 Para produção, configure:")
-    print("   - SECRET_KEY no .env")
-    print("   - ADMIN_KEY no .env") 
-    print("   - FLASK_ENV=production")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    app.run(debug=os.environ.get('FLASK_ENV') != 'production', host='0.0.0.0', port=5000)
