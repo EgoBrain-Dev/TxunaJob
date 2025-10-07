@@ -57,4 +57,4 @@ logs/
 *.env
 instance/
 __pycache__/
-*.pyc
+*.pyc.env
