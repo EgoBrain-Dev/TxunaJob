@@ -58,3 +58,15 @@ logs/
 instance/
 __pycache__/
 *.pyc.env
+
+# Arquivos sensíveis
+.env
+*.env.local
+*.env.production
+
+# Banco de dados local
+*.db
+*.sqlite3
+
+# Logs
+*.log
