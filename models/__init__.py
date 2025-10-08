@@ -1,109 +1,88 @@
-# models/__init__.py
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from bson.objectid import ObjectId
 from datetime import datetime
+from flask import current_app
 
-db = SQLAlchemy()
-
-class User(UserMixin, db.Model):
-    __tablename__ = 'users'
+class User(UserMixin):
+    def __init__(self, user_data):
+        self.id = str(user_data['_id'])
+        self.username = user_data['username']
+        self.email = user_data['email']
+        self.user_type = user_data['user_type']
+        self.phone = user_data.get('phone', '')
+        self.location = user_data.get('location', '')
+        self.password_hash = user_data['password_hash']
+        self.created_at = user_data.get('created_at', datetime.utcnow())
     
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(100), unique=True, nullable=False)
-    email = db.Column(db.String(100), unique=True, nullable=False)
-    password_hash = db.Column(db.String(200), nullable=False)
-    user_type = db.Column(db.String(20), nullable=False)  # 'client', 'professional' or 'admin'
-    phone = db.Column(db.String(20))
-    location = db.Column(db.String(100))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    @staticmethod
+    def get(user_id):
+        try:
+            if not current_app or not hasattr(current_app, 'users_collection'):
+                return None
+            user_data = current_app.users_collection.find_one({'_id': ObjectId(user_id)})
+            return User(user_data) if user_data else None
+        except:
+            return None
     
-    # Relacionamentos específicos por tipo
-    client_profile = db.relationship('Client', backref='user', uselist=False, lazy=True)
-    professional_profile = db.relationship('Professional', backref='user', uselist=False, lazy=True)
-    admin_profile = db.relationship('Admin', backref='user', uselist=False, lazy=True)
+    @staticmethod
+    def find_by_username(username):
+        if not current_app or not hasattr(current_app, 'users_collection'):
+            return None
+        user_data = current_app.users_collection.find_one({'username': username})
+        return User(user_data) if user_data else None
     
-    def set_password(self, password):
-        self.password_hash = generate_password_hash(password)
+    @staticmethod
+    def find_by_email(email):
+        if not current_app or not hasattr(current_app, 'users_collection'):
+            return None
+        user_data = current_app.users_collection.find_one({'email': email})
+        return User(user_data) if user_data else None
     
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-    
-    def __repr__(self):
-        return f'<User {self.username} - {self.user_type}>'
 
-class Client(db.Model):
-    __tablename__ = 'clients'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    full_name = db.Column(db.String(150), nullable=False)
-    # Campos específicos do cliente
-    preferences = db.Column(db.Text)  # Preferências de serviços
-    
-    def __repr__(self):
-        return f'<Client {self.full_name}>'
+# Funções auxiliares para acessar collections
+def get_users_collection():
+    return current_app.users_collection if current_app and hasattr(current_app, 'users_collection') else None
 
-class Professional(db.Model):
-    __tablename__ = 'professionals'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    full_name = db.Column(db.String(150), nullable=False)
-    specialty = db.Column(db.String(100), nullable=False)  # Eletricista, Pintor, etc.
-    experience = db.Column(db.Integer)  # Anos de experiência
-    description = db.Column(db.Text)    # Descrição do profissional
-    hourly_rate = db.Column(db.Float)   # Preço por hora
-    is_verified = db.Column(db.Boolean, default=False)
-    
-    def __repr__(self):
-        return f'<Professional {self.full_name} - {self.specialty}>'
+def get_clients_collection():
+    return current_app.clients_collection if current_app and hasattr(current_app, 'clients_collection') else None
 
-class Admin(db.Model):
-    __tablename__ = 'admins'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    permissions = db.Column(db.Text)  # JSON de permissões
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    def __repr__(self):
-        return f'<Admin {self.user.username}>'
+def get_professionals_collection():
+    return current_app.professionals_collection if current_app and hasattr(current_app, 'professionals_collection') else None
 
-class Service(db.Model):
-    __tablename__ = 'services'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    professional_id = db.Column(db.Integer, db.ForeignKey('professionals.id'), nullable=False)
-    title = db.Column(db.String(100), nullable=False)
-    description = db.Column(db.Text, nullable=False)
-    price = db.Column(db.Float, nullable=False)
-    category = db.Column(db.String(50), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    professional = db.relationship('Professional', backref='services', lazy=True)
-    
-    def __repr__(self):
-        return f'<Service {self.title} - {self.category}>'
+def get_admins_collection():
+    return current_app.admins_collection if current_app and hasattr(current_app, 'admins_collection') else None
 
-class Chat(db.Model):
-    __tablename__ = 'chats'
-    
-    id = db.Column(db.Integer, primary_key=True)
-    client_id = db.Column(db.Integer, db.ForeignKey('clients.id'), nullable=False)
-    professional_id = db.Column(db.Integer, db.ForeignKey('professionals.id'), nullable=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    
-    client = db.relationship('Client', backref='chats', lazy=True)
-    professional = db.relationship('Professional', backref='chats', lazy=True)
-    messages = db.relationship('Message', backref='chat', lazy=True)
+def get_services_collection():
+    return current_app.services_collection if current_app and hasattr(current_app, 'services_collection') else None
 
-class Message(db.Model):
-    __tablename__ = 'messages'
+def get_chats_collection():
+    return current_app.chats_collection if current_app and hasattr(current_app, 'chats_collection') else None
+
+def get_messages_collection():
+    return current_app.messages_collection if current_app and hasattr(current_app, 'messages_collection') else None
+
+def get_all_collections():
+    """Só funciona dentro do contexto da aplicação"""
+    if not current_app or not hasattr(current_app, 'users_collection'):
+        return {
+            'users': None,
+            'clients': None,
+            'professionals': None,
+            'admins': None,
+            'services': None,
+            'chats': None,
+            'messages': None
+        }
     
-    id = db.Column(db.Integer, primary_key=True)
-    chat_id = db.Column(db.Integer, db.ForeignKey('chats.id'), nullable=False)
-    sender_id = db.Column(db.Integer, nullable=False)  # ID do usuário que enviou
-    content = db.Column(db.Text, nullable=False)
-    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    is_read = db.Column(db.Boolean, default=False)
+    return {
+        'users': current_app.users_collection,
+        'clients': current_app.clients_collection,
+        'professionals': current_app.professionals_collection,
+        'admins': current_app.admins_collection,
+        'services': current_app.services_collection,
+        'chats': current_app.chats_collection,
+        'messages': current_app.messages_collection
+    }
