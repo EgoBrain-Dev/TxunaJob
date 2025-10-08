@@ -1,11 +1,12 @@
-# app.py - VERSÃO SEGURA SEM EXPOSIÇÃO DE CREDENCIAIS
+# app.py - VERSÃO MONGODB SEGURA COM AMBIENTES SEPARADOS
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
 from werkzeug.security import generate_password_hash, check_password_hash
+from pymongo import MongoClient
+from bson.objectid import ObjectId
 import os
-import json
 import secrets
+import json
 from datetime import datetime
 
 # Carregar variáveis de ambiente do arquivo .env
@@ -21,83 +22,141 @@ if not secret_key:
 
 app.config['SECRET_KEY'] = secret_key
 
-# Configuração do banco de dados
-if os.environ.get('VERCEL'):
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-else:
-    database_url = os.environ.get('DATABASE_URL', 'sqlite:///txunajob.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = database_url
+# 🔗 CONEXÃO MONGODB SEGURA COM AMBIENTES SEPARADOS
+def get_mongo_connection():
+    mongodb_password = os.environ.get('MONGODB_PASSWORD')
+    flask_env = os.environ.get('FLASK_ENV', 'development')
+    
+    # 🛡️ DEFINIR DATABASE BASEADO NO AMBIENTE
+    if flask_env == 'production':
+        database_name = 'txunajob'
+    else:
+        database_name = 'txunajob_dev'
+    
+    if not mongodb_password:
+        # MongoDB Local (fallback)
+        try:
+            client = MongoClient('mongodb://localhost:27017/')
+            return client
+        except Exception:
+            return MongoClient('mongodb://localhost:27017/')
+    
+    # MongoDB Atlas
+    try:
+        MONGODB_URI = f"mongodb+srv://Egobrain-dev:{mongodb_password}@txunajob.r8q0ldm.mongodb.net/{database_name}?retryWrites=true&w=majority&appName=txunajob"
+        client = MongoClient(MONGODB_URI)
+        client.admin.command('ping')
+        return client
+    except Exception:
+        # Fallback para MongoDB local
+        try:
+            client = MongoClient('mongodb://localhost:27017/')
+            return client
+        except:
+            return MongoClient('mongodb://localhost:27017/')
 
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+# Inicializar conexão MongoDB
+client = get_mongo_connection()
+db = client.get_database()
 
-# Importar a instância única do SQLAlchemy dos modelos
-from models import db
-
-# Inicializar a extensão SQLAlchemy com a app
-db.init_app(app)
+# Coleções (equivalentes às tabelas)
+users_collection = db.users
+clients_collection = db.clients
+professionals_collection = db.professionals
+admins_collection = db.admins
+services_collection = db.services
+chats_collection = db.chats
+messages_collection = db.messages
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
 login_manager.login_message = 'Por favor, faça login para acessar esta página.'
 
-# Importar modelos DEPOIS de inicializar db
-from models import User, Client, Professional, Admin, Service, Chat, Message
-
-# Configurar loader de usuário
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
 # 🔒 MIDDLEWARE DE SEGURANÇA
 @app.before_request
 def security_checks():
     """Middleware para verificações de segurança"""
-    
-    # Bloquear requisições SSL/TLS indesejadas
     if request.data and len(request.data) > 10:
         if request.data[0] == 0x16 and request.data[1] == 0x03:
             return '', 400
         if b'\x16\x03' in request.data[:10]:
             return '', 400
 
+# 🔒 USER CLASS PARA FLASK-LOGIN
+class User(UserMixin):
+    def __init__(self, user_data):
+        self.id = str(user_data['_id'])
+        self.username = user_data['username']
+        self.email = user_data['email']
+        self.user_type = user_data['user_type']
+        self.phone = user_data.get('phone', '')
+        self.location = user_data.get('location', '')
+        self.password_hash = user_data['password_hash']
+        self.created_at = user_data.get('created_at', datetime.utcnow())
+
+    @staticmethod
+    def get(user_id):
+        try:
+            user_data = users_collection.find_one({'_id': ObjectId(user_id)})
+            return User(user_data) if user_data else None
+        except:
+            return None
+
+    @staticmethod
+    def find_by_username(username):
+        user_data = users_collection.find_one({'username': username})
+        return User(user_data) if user_data else None
+
+    @staticmethod
+    def find_by_email(email):
+        user_data = users_collection.find_one({'email': email})
+        return User(user_data) if user_data else None
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
+
+# CONFIGURAR LOADER DE USUÁRIO
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
+
 # 🔒 FUNÇÃO SEGURA PARA CRIAR ADMIN PADRÃO
 def create_default_admin():
     """Cria admin padrão de forma segura sem expor credenciais"""
     
-    # Verificar se já existe algum admin
-    if User.query.filter_by(user_type='admin').first():
+    if users_collection.find_one({'user_type': 'admin'}):
         return
     
-    # 🔒 CREDENCIAIS SEGURAS - NADA FIXO NO CÓDIGO
     admin_username = os.environ.get('DEFAULT_ADMIN_USERNAME', 'txunajob_admin')
     admin_email = os.environ.get('DEFAULT_ADMIN_EMAIL', 'admin@txunajob.local')
+    admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD', 'admin_temp_password_123')
     
-    # 🔒 SENHA SEGURA - OBRIGATÓRIO definir no .env
-    admin_password = os.environ.get('DEFAULT_ADMIN_PASSWORD')
+    if users_collection.find_one({'username': admin_username}):
+        return
     
-    if not admin_password:
-        # ⚠️ EM PRODUÇÃO, EXIGIR senha no .env
-        if os.environ.get('FLASK_ENV') == 'production':
-            raise ValueError("DEFAULT_ADMIN_PASSWORD não definida no .env para produção")
-        else:
-            admin_password = "admin_temp_password_123"
+    admin_user = {
+        'username': admin_username,
+        'email': admin_email,
+        'password_hash': generate_password_hash(admin_password),
+        'user_type': 'admin',
+        'phone': '',
+        'location': '',
+        'created_at': datetime.utcnow()
+    }
     
-    admin_user = User(
-        username=admin_username,
-        email=admin_email,
-        user_type='admin'
-    )
-    admin_user.set_password(admin_password)
-    
-    admin_profile = Admin(
-        user=admin_user,
-        permissions=json.dumps({'all': True})
-    )
-    
-    db.session.add(admin_user)
-    db.session.add(admin_profile)
-    db.session.commit()
+    try:
+        user_id = users_collection.insert_one(admin_user).inserted_id
+        
+        admin_profile = {
+            'user_id': user_id,
+            'permissions': json.dumps({'all': True}),
+            'created_at': datetime.utcnow()
+        }
+        
+        admins_collection.insert_one(admin_profile)
+    except Exception:
+        pass
 
 # Rotas principais
 @app.route('/')
@@ -111,12 +170,11 @@ def login():
         username = request.form.get('username')
         password = request.form.get('password')
         
-        # Validação básica
         if not username or not password:
             flash('Por favor, preencha todos os campos', 'error')
             return render_template('auth/login.html')
         
-        user = User.query.filter_by(username=username).first()
+        user = User.find_by_username(username)
         
         if user and user.check_password(password):
             login_user(user)
@@ -145,7 +203,6 @@ def register_client():
         phone = request.form.get('phone')
         location = request.form.get('location')
         
-        # 🔒 VALIDAÇÕES
         if not all([username, email, password, full_name]):
             flash('Por favor, preencha todos os campos obrigatórios', 'error')
             return redirect(url_for('register_client'))
@@ -154,35 +211,40 @@ def register_client():
             flash('A senha deve ter pelo menos 6 caracteres', 'error')
             return redirect(url_for('register_client'))
         
-        # ✅ VERIFICAÇÃO DUPLA: username e email
-        if User.query.filter_by(username=username).first():
+        if users_collection.find_one({'username': username}):
             flash('Nome de usuário já existe', 'error')
             return redirect(url_for('register_client'))
         
-        if User.query.filter_by(email=email).first():
+        if users_collection.find_one({'email': email}):
             flash('Email já está em uso', 'error')
             return redirect(url_for('register_client'))
         
-        user = User(
-            username=username,
-            email=email,
-            user_type='client',
-            phone=phone,
-            location=location
-        )
-        user.set_password(password)
+        user_data = {
+            'username': username,
+            'email': email,
+            'password_hash': generate_password_hash(password),
+            'user_type': 'client',
+            'phone': phone or '',
+            'location': location or '',
+            'created_at': datetime.utcnow()
+        }
         
-        client = Client(
-            user=user,
-            full_name=full_name
-        )
-        
-        db.session.add(user)
-        db.session.add(client)
-        db.session.commit()
-        
-        flash('Conta de cliente criada com sucesso!', 'success')
-        return redirect(url_for('login'))
+        try:
+            user_id = users_collection.insert_one(user_data).inserted_id
+            
+            client_data = {
+                'user_id': user_id,
+                'full_name': full_name,
+                'preferences': ''
+            }
+            
+            clients_collection.insert_one(client_data)
+            
+            flash('Conta de cliente criada com sucesso!', 'success')
+            return redirect(url_for('login'))
+        except Exception:
+            flash('Erro ao criar conta. Tente novamente.', 'error')
+            return redirect(url_for('register_client'))
     
     return render_template('auth/register_client.html')
 
@@ -200,7 +262,6 @@ def register_professional():
         description = request.form.get('description')
         other_specialty = request.form.get('other_specialty')
         
-        # 🔒 VALIDAÇÕES
         if not all([username, email, password, full_name, specialty]):
             flash('Por favor, preencha todos os campos obrigatórios', 'error')
             return redirect(url_for('register_professional'))
@@ -209,47 +270,51 @@ def register_professional():
             flash('A senha deve ter pelo menos 6 caracteres', 'error')
             return redirect(url_for('register_professional'))
         
-        # ✅ VERIFICAÇÃO DUPLA: username e email
-        if User.query.filter_by(username=username).first():
+        if users_collection.find_one({'username': username}):
             flash('Nome de usuário já existe', 'error')
             return redirect(url_for('register_professional'))
         
-        if User.query.filter_by(email=email).first():
+        if users_collection.find_one({'email': email}):
             flash('Email já está em uso', 'error')
             return redirect(url_for('register_professional'))
         
-        # 🔧 TRATAR ESPECIALIDADE "OUTROS"
         final_specialty = other_specialty if specialty == 'other' else specialty
         
-        user = User(
-            username=username,
-            email=email,
-            user_type='professional',
-            phone=phone,
-            location=location
-        )
-        user.set_password(password)
+        user_data = {
+            'username': username,
+            'email': email,
+            'password_hash': generate_password_hash(password),
+            'user_type': 'professional',
+            'phone': phone or '',
+            'location': location or '',
+            'created_at': datetime.utcnow()
+        }
         
-        professional = Professional(
-            user=user,
-            full_name=full_name,
-            specialty=final_specialty,
-            experience=int(experience) if experience else 0,
-            description=description
-        )
-        
-        db.session.add(user)
-        db.session.add(professional)
-        db.session.commit()
-        
-        flash('Conta de profissional criada com sucesso!', 'success')
-        return redirect(url_for('login'))
+        try:
+            user_id = users_collection.insert_one(user_data).inserted_id
+            
+            professional_data = {
+                'user_id': user_id,
+                'full_name': full_name,
+                'specialty': final_specialty,
+                'experience': int(experience) if experience else 0,
+                'description': description or '',
+                'hourly_rate': 0.0,
+                'is_verified': False
+            }
+            
+            professionals_collection.insert_one(professional_data)
+            
+            flash('Conta de profissional criada com sucesso!', 'success')
+            return redirect(url_for('login'))
+        except Exception:
+            flash('Erro ao criar conta. Tente novamente.', 'error')
+            return redirect(url_for('register_professional'))
     
     return render_template('auth/register_pro.html')
 
 @app.route('/register/admin', methods=['GET', 'POST'])
 def register_admin():
-    # 🔒 RESTRINGIR ACESSO EM PRODUÇÃO
     if os.environ.get('FLASK_ENV') == 'production':
         flash('Registro de administrador desativado em produção', 'error')
         return redirect(url_for('index'))
@@ -261,7 +326,6 @@ def register_admin():
         full_name = request.form.get('full_name')
         admin_key = request.form.get('admin_key')
         
-        # 🔒 VALIDAÇÕES
         if not all([username, email, password, full_name, admin_key]):
             flash('Por favor, preencha todos os campos', 'error')
             return redirect(url_for('register_admin'))
@@ -270,7 +334,6 @@ def register_admin():
             flash('A senha de admin deve ter pelo menos 8 caracteres', 'error')
             return redirect(url_for('register_admin'))
         
-        # 🔒 CHAVE DE ADMIN SEGURA
         expected_admin_key = os.environ.get('ADMIN_KEY')
         if not expected_admin_key:
             flash('Sistema de administração não configurado', 'error')
@@ -280,33 +343,40 @@ def register_admin():
             flash('Chave de administrador inválida', 'error')
             return redirect(url_for('register_admin'))
         
-        # ✅ VERIFICAÇÃO DUPLA: username e email
-        if User.query.filter_by(username=username).first():
+        if users_collection.find_one({'username': username}):
             flash('Nome de usuário já existe', 'error')
             return redirect(url_for('register_admin'))
         
-        if User.query.filter_by(email=email).first():
+        if users_collection.find_one({'email': email}):
             flash('Email já está em uso', 'error')
             return redirect(url_for('register_admin'))
         
-        user = User(
-            username=username,
-            email=email,
-            user_type='admin'
-        )
-        user.set_password(password)
+        user_data = {
+            'username': username,
+            'email': email,
+            'password_hash': generate_password_hash(password),
+            'user_type': 'admin',
+            'phone': '',
+            'location': '',
+            'created_at': datetime.utcnow()
+        }
         
-        admin = Admin(
-            user=user,
-            permissions=json.dumps({'all': True})
-        )
-        
-        db.session.add(user)
-        db.session.add(admin)
-        db.session.commit()
-        
-        flash('Conta de administrador criada com sucesso!', 'success')
-        return redirect(url_for('login'))
+        try:
+            user_id = users_collection.insert_one(user_data).inserted_id
+            
+            admin_data = {
+                'user_id': user_id,
+                'permissions': json.dumps({'all': True}),
+                'created_at': datetime.utcnow()
+            }
+            
+            admins_collection.insert_one(admin_data)
+            
+            flash('Conta de administrador criada com sucesso!', 'success')
+            return redirect(url_for('login'))
+        except Exception:
+            flash('Erro ao criar conta. Tente novamente.', 'error')
+            return redirect(url_for('register_admin'))
     
     return render_template('auth/register_admin.html')
 
@@ -346,13 +416,12 @@ def admin_dashboard():
         flash('Acesso não autorizado', 'error')
         return redirect(url_for('index'))
     
-    # Estatísticas básicas
     stats = {
-        'total_users': User.query.count(),
-        'total_clients': Client.query.count(),
-        'total_professionals': Professional.query.count(),
-        'total_services': Service.query.count() if hasattr(Service, 'query') else 0,
-        'pending_verifications': Professional.query.filter_by(is_verified=False).count()
+        'total_users': users_collection.count_documents({}),
+        'total_clients': clients_collection.count_documents({}),
+        'total_professionals': professionals_collection.count_documents({}),
+        'total_services': services_collection.count_documents({}),
+        'pending_verifications': professionals_collection.count_documents({'is_verified': False})
     }
     
     return render_template('dashboards/admin_dashboard.html', stats=stats)
@@ -362,7 +431,7 @@ def admin_dashboard():
 def services():
     return render_template('services/services.html')
 
-@app.route('/services/<int:service_id>')
+@app.route('/services/<service_id>')
 def service_detail(service_id):
     return render_template('services/service_detail.html', service_id=service_id)
 
@@ -386,23 +455,18 @@ def admin_stats():
         return jsonify({'error': 'Não autorizado'}), 403
     
     stats = {
-        'total_users': User.query.count(),
-        'total_clients': Client.query.count(),
-        'total_professionals': Professional.query.count(),
-        'total_services': Service.query.count() if hasattr(Service, 'query') else 0,
-        'pending_verifications': Professional.query.filter_by(is_verified=False).count()
+        'total_users': users_collection.count_documents({}),
+        'total_clients': clients_collection.count_documents({}),
+        'total_professionals': professionals_collection.count_documents({}),
+        'total_services': services_collection.count_documents({}),
+        'pending_verifications': professionals_collection.count_documents({'is_verified': False})
     }
     
     return jsonify({'success': True, 'stats': stats})
 
 # Inicializar banco de dados
 def init_db():
-    with app.app_context():
-        # Criar todas as tabelas
-        db.create_all()
-        
-        # 🔒 CRIAR ADMIN PADRÃO COM SEGURANÇA
-        create_default_admin()
+    create_default_admin()
 
 if __name__ == '__main__':
     init_db()

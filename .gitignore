@@ -1,4 +1,4 @@
-# Python
+# ===== Python =====
 __pycache__/
 *.py[cod]
 *$py.class
@@ -20,53 +20,44 @@ wheels/
 .installed.cfg
 *.egg
 
-# Environment
+# ===== Ambientes virtuais =====
 .env
-.venv
+.venv/
 env/
 venv/
 ENV/
 env.bak/
 venv.bak/
 
-# Database
+# ===== Variáveis de ambiente =====
+.env
+.env.local
+.env.production
+*.env
+
+# ===== Bancos de dados =====
 *.db
+*.sqlite
 *.sqlite3
 instance/
+data/
+mongodb-data/
+data/db/
 
-# IDE
+# ===== Logs =====
+*.log
+logs/
+
+# ===== IDE / Editor =====
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS
+# ===== Sistema Operacional =====
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-logs/
-
-# Temporary files
+# ===== Arquivos temporários =====
 *.tmp
 *.temp
-
-#variaveis do ambiente 
-.env
-*.env
-instance/
-__pycache__/
-*.pyc.env
-
-# Arquivos sensíveis
-.env
-*.env.local
-*.env.production
-
-# Banco de dados local
-*.db
-*.sqlite3
-
-# Logs
-*.log
