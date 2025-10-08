@@ -161,17 +161,11 @@ def create_default_admin():
 # Rotas principais
 @app.route('/')
 def index():
-    if db is None:
-        flash('Sistema em manutenção. Tente novamente em alguns minutos.', 'info')
     return render_template('index.html')
 
 # Rotas de autenticação
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    if db is None:
-        flash('Sistema em manutenção. Tente novamente em alguns minutos.', 'error')
-        return render_template('auth/login.html')
-    
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
@@ -200,10 +194,6 @@ def login():
 
 @app.route('/register/client', methods=['GET', 'POST'])
 def register_client():
-    if db is None:
-        flash('Sistema em manutenção. Tente novamente em alguns minutos.', 'error')
-        return render_template('auth/register_client.html')
-    
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
@@ -255,10 +245,6 @@ def register_client():
 
 @app.route('/register/professional', methods=['GET', 'POST'])
 def register_professional():
-    if db is None:
-        flash('Sistema em manutenção. Tente novamente em alguns minutos.', 'error')
-        return render_template('auth/register_pro.html')
-    
     if request.method == 'POST':
         username = request.form.get('username')
         email = request.form.get('email')
@@ -324,10 +310,20 @@ def register_admin():
         flash('Sistema em manutenção. Tente novamente em alguns minutos.', 'error')
         return render_template('auth/register_admin.html')
     
-    # 🔒 Em produção, desativar registro de admin
+    # Verificar se já existe algum admin no sistema
+    admin_exists = users_collection and users_collection.find_one({'user_type': 'admin'})
+    
+    # 🔒 Lógica de acesso corrigida:
     if flask_env == 'production':
-        flash('Registro de administrador desativado em produção', 'error')
-        return redirect(url_for('index'))
+        if admin_exists:
+            # Se já existe admin, só admins podem criar novos
+            if not current_user.is_authenticated or current_user.user_type != 'admin':
+                flash('Acesso restrito a administradores', 'error')
+                return redirect(url_for('login'))
+        else:
+            # Se NÃO existe admin, qualquer um pode criar o primeiro (com chave)
+            # Não redireciona - permite acesso ao formulário
+            pass
 
     if request.method == 'POST':
         username = request.form.get('username')
@@ -336,21 +332,27 @@ def register_admin():
         full_name = request.form.get('full_name')
         admin_key = request.form.get('admin_key')
         
-        if not all([username, email, password, full_name, admin_key]):
+        # 🔑 Validação da chave apenas se for o PRIMEIRO admin
+        if not admin_exists:
+            if not admin_key:
+                flash('Chave de administrador é obrigatória para criar o primeiro admin', 'error')
+                return redirect(url_for('register_admin'))
+            
+            expected_admin_key = os.environ.get('ADMIN_REGISTRATION_KEY')
+            if not expected_admin_key:
+                flash('Sistema de administração não configurado', 'error')
+                return redirect(url_for('index'))
+            
+            if admin_key != expected_admin_key:
+                flash('Chave de administrador inválida', 'error')
+                return redirect(url_for('register_admin'))
+        
+        if not all([username, email, password, full_name]):
             flash('Por favor, preencha todos os campos', 'error')
             return redirect(url_for('register_admin'))
         
         if len(password) < 8:
             flash('A senha de admin deve ter pelo menos 8 caracteres', 'error')
-            return redirect(url_for('register_admin'))
-        
-        expected_admin_key = os.environ.get('ADMIN_REGISTRATION_KEY')
-        if not expected_admin_key:
-            flash('Sistema de administração não configurado', 'error')
-            return redirect(url_for('index'))
-        
-        if admin_key != expected_admin_key:
-            flash('Chave de administrador inválida', 'error')
             return redirect(url_for('register_admin'))
         
         if users_collection.find_one({'username': username}):
@@ -380,11 +382,17 @@ def register_admin():
             }
             admins_collection.insert_one(admin_data)
             flash('Conta de administrador criada com sucesso!', 'success')
-            return redirect(url_for('login'))
+            
+            if admin_exists and current_user.user_type == 'admin':
+                return redirect(url_for('admin_dashboard'))
+            else:
+                return redirect(url_for('login'))
+                
         except Exception:
             flash('Erro ao criar conta. Tente novamente.', 'error')
     
-    return render_template('auth/register_admin.html')
+    # 🔄 Passar informação para o template se é primeiro admin ou não
+    return render_template('auth/register_admin.html', is_first_admin=not admin_exists)
 
 @app.route('/logout')
 @login_required
