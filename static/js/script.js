@@ -1,8 +1,8 @@
 /**
  * TxunaJob - JavaScript Global
- * Sistemas essenciais para todas as páginas
+ * Sistemas essenciais para TODAS as páginas
  * Autor: EgoBrain-Dev
- * Versão: 1.0.0
+ * Versão: 2.0.0 - Limpo e Otimizado
  */
 
 const AppState = {
@@ -14,7 +14,7 @@ const AppState = {
 };
 
 // =============================================================================
-// SISTEMA DE TEMA
+// SISTEMA DE TEMA GLOBAL
 // =============================================================================
 
 class ThemeSystem {
@@ -63,7 +63,7 @@ class ThemeSystem {
 }
 
 // =============================================================================
-// SISTEMA DE ACESSIBILIDADE
+// SISTEMA DE ACESSIBILIDADE GLOBAL
 // =============================================================================
 
 class AccessibilitySystem {
@@ -161,7 +161,7 @@ class AccessibilitySystem {
 }
 
 // =============================================================================
-// SISTEMA DE MENU MOBILE
+// SISTEMA DE MENU MOBILE GLOBAL
 // =============================================================================
 
 class MobileMenuSystem {
@@ -241,240 +241,7 @@ class MobileMenuSystem {
 }
 
 // =============================================================================
-// SISTEMA DE PROFISSIONAIS
-// =============================================================================
-
-class ProfessionalsSystem {
-    static init() {
-        const grid = document.getElementById('professionalsGrid');
-        if (grid) {
-            this.load();
-        }
-        
-        this.setupCategoryFilters();
-    }
-    
-    static setupCategoryFilters() {
-        const categoryButtons = document.querySelectorAll('.category-btn, .category-filter, [data-category]');
-        categoryButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.preventDefault();
-                this.handleCategoryClick(btn);
-            });
-        });
-    }
-    
-    static handleCategoryClick(button) {
-        document.querySelectorAll('.category-btn, .category-filter, [data-category]').forEach(btn => {
-            btn.classList.remove('active', 'selected');
-        });
-        
-        button.classList.add('active', 'selected');
-        
-        const category = button.dataset.category || button.textContent.trim();
-        this.filterByCategory(category);
-    }
-    
-    static filterByCategory(category) {
-        const grid = document.getElementById('professionalsGrid');
-        if (!grid) return;
-        
-        grid.innerHTML = this.createLoadingState(`Filtrando por: ${category}`);
-        
-        setTimeout(() => {
-            if (category === 'all' || category === 'Todas' || category === 'Todos') {
-                this.load();
-            } else {
-                grid.innerHTML = this.createCategoryResults(category);
-            }
-        }, 1000);
-    }
-    
-    static async load() {
-        const grid = document.getElementById('professionalsGrid');
-        if (!grid) return;
-        
-        grid.innerHTML = this.createLoadingState('Carregando profissionais...');
-        
-        try {
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            const professionals = await this.fetchProfessionals();
-            this.displayProfessionals(professionals);
-        } catch (error) {
-            this.displayError();
-        }
-    }
-    
-    static createLoadingState(message = 'Carregando...') {
-        return `
-            <div class="loading-state">
-                <div class="loading-spinner">
-                    <i class="fas fa-spinner fa-spin"></i>
-                </div>
-                <p class="loading-message">${message}</p>
-            </div>
-        `;
-    }
-    
-    static async fetchProfessionals() {
-        return [
-            {
-                id: 1,
-                name: "João Eletricista",
-                category: "Eletricista",
-                rating: 4.8,
-                reviews: 47,
-                location: "Maputo",
-                skills: ["Instalação elétrica", "Manutenção", "Reparação", "Quadros elétricos"],
-                hourly_rate: "350.00",
-                description: "Especialista em instalações elétricas residenciais e comerciais com 8 anos de experiência.",
-                verified: true,
-                image: null
-            },
-            {
-                id: 2,
-                name: "Maria Encanadora", 
-                category: "Encanadora",
-                rating: 4.9,
-                reviews: 32,
-                location: "Matola",
-                skills: ["Encanamento", "Desentupimento", "Instalação", "Manutenção"],
-                hourly_rate: "300.00",
-                description: "Profissional com 5 anos de experiência em encanamento residencial e comercial.",
-                verified: true,
-                image: null
-            }
-        ];
-    }
-    
-    static displayProfessionals(professionals) {
-        const grid = document.getElementById('professionalsGrid');
-        if (!grid) return;
-        
-        if (!professionals || professionals.length === 0) {
-            grid.innerHTML = this.createEmptyState();
-            return;
-        }
-        
-        grid.innerHTML = professionals.map(pro => this.createProfessionalCard(pro)).join('');
-    }
-    
-    static createProfessionalCard(professional) {
-        const skills = professional.skills.slice(0, 3).join(' • ');
-        const ratingStars = '⭐'.repeat(Math.floor(professional.rating)) + '☆'.repeat(5 - Math.floor(professional.rating));
-        
-        return `
-            <div class="professional-card" data-category="${professional.category.toLowerCase()}">
-                <div class="card-header">
-                    <div class="professional-avatar">
-                        <i class="fas fa-user-tie"></i>
-                        ${professional.verified ? '<span class="verified-badge" title="Profissional Verificado"><i class="fas fa-check-circle"></i></span>' : ''}
-                    </div>
-                    <div class="professional-info">
-                        <h3 class="professional-name">${professional.name}</h3>
-                        <span class="professional-category">${professional.category}</span>
-                        <div class="professional-rating">
-                            <span class="stars">${ratingStars}</span>
-                            <span class="rating">${professional.rating}</span>
-                            <span class="reviews">(${professional.reviews} avaliações)</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="card-body">
-                    <div class="professional-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <span>${professional.location}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-clock"></i>
-                            <span>${professional.hourly_rate} MT/hora</span>
-                        </div>
-                    </div>
-                    
-                    <div class="professional-skills">
-                        <strong>Habilidades:</strong>
-                        <p>${skills}</p>
-                    </div>
-                    
-                    <div class="professional-description">
-                        <p>${professional.description}</p>
-                    </div>
-                </div>
-                
-                <div class="card-footer">
-                    <button class="btn btn-primary btn-contact" onclick="ProfessionalsSystem.contactProfessional(${professional.id})">
-                        <i class="fas fa-envelope"></i>
-                        Contactar
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-    
-    static createEmptyState() {
-        return `
-            <div class="empty-state">
-                <div class="empty-icon">
-                    <i class="fas fa-search"></i>
-                </div>
-                <h3>Nenhum profissional encontrado</h3>
-                <p>Tente novamente mais tarde.</p>
-            </div>
-        `;
-    }
-    
-    static createCategoryResults(category) {
-        return `
-            <div class="category-results">
-                <div class="results-header">
-                    <h3>Filtro: ${category}</h3>
-                    <p>Esta funcionalidade de filtro estará disponível em breve!</p>
-                </div>
-                <div class="results-actions">
-                    <button class="btn btn-primary" onclick="ProfessionalsSystem.load()">
-                        <i class="fas fa-eye"></i>
-                        Ver Todos
-                    </button>
-                </div>
-            </div>
-        `;
-    }
-    
-    static displayError() {
-        const grid = document.getElementById('professionalsGrid');
-        if (!grid) return;
-        
-        grid.innerHTML = `
-            <div class="error-state">
-                <div class="error-icon">
-                    <i class="fas fa-wifi-slash"></i>
-                </div>
-                <h3>Erro de Conexão</h3>
-                <p>Não foi possível carregar os profissionais.</p>
-                <button class="btn btn-primary" onclick="ProfessionalsSystem.load()">
-                    <i class="fas fa-redo"></i>
-                    Tentar Novamente
-                </button>
-            </div>
-        `;
-    }
-    
-    static contactProfessional(professionalId) {
-        if (!AppState.currentUser) {
-            const shouldLogin = confirm('Para contactar profissionais, é necessário fazer login. Deseja fazer login agora?');
-            if (shouldLogin) {
-                window.location.href = '/login';
-            }
-            return;
-        }
-        alert(`Contactando profissional #${professionalId}`);
-    }
-}
-
-// =============================================================================
-// SISTEMA DE NAVEGAÇÃO
+// SISTEMA DE NAVEGAÇÃO GLOBAL
 // =============================================================================
 
 class NavigationSystem {
@@ -490,28 +257,28 @@ class NavigationSystem {
         if (clientBtn) {
             clientBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = '/register/client';
+                window.location.href = '/auth/register/client';
             });
         }
         
         if (professionalBtn) {
             professionalBtn.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = '/register/professional';
+                window.location.href = '/auth/register/professional';
             });
         }
         
         document.querySelectorAll('.btn-register-client').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = '/register/client';
+                window.location.href = '/auth/register/client';
             });
         });
         
         document.querySelectorAll('.btn-register-professional').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = '/register/professional';
+                window.location.href = '/auth/register/professional';
             });
         });
     }
@@ -520,35 +287,76 @@ class NavigationSystem {
         document.querySelectorAll('.btn-login, [data-action="login"]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = '/login';
+                window.location.href = '/auth/login';
             });
         });
         
         document.querySelectorAll('.btn-logout, [data-action="logout"]').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                window.location.href = '/logout';
+                window.location.href = '/auth/logout';
             });
         });
     }
 }
 
 // =============================================================================
-// INICIALIZAÇÃO PRINCIPAL
+// SISTEMA DE NOTIFICAÇÕES GLOBAL (BÁSICO)
+// =============================================================================
+
+class NotificationSystem {
+    static show(message, type = 'info', duration = 5000) {
+        const notification = document.createElement('div');
+        notification.className = `notification notification-${type}`;
+        notification.innerHTML = `
+            <div class="notification-content">
+                <i class="fas fa-${this.getIcon(type)}"></i>
+                <span>${message}</span>
+                <button class="notification-close">&times;</button>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Fechar notificação
+        const closeBtn = notification.querySelector('.notification-close');
+        closeBtn.addEventListener('click', () => notification.remove());
+        
+        // Auto-remover após duração
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, duration);
+        
+        return notification;
+    }
+    
+    static getIcon(type) {
+        const icons = {
+            'success': 'check-circle',
+            'error': 'exclamation-circle',
+            'warning': 'exclamation-triangle',
+            'info': 'info-circle'
+        };
+        return icons[type] || 'info-circle';
+    }
+}
+
+// =============================================================================
+// INICIALIZAÇÃO PRINCIPAL GLOBAL
 // =============================================================================
 
 class TxunaJobApp {
     static init() {
-        // Inicializar sistemas essenciais
+        // Inicializar sistemas essenciais globais
         ThemeSystem.init();
         AccessibilitySystem.init();
-        
-        // Inicializar sistemas de UI
         MobileMenuSystem.init();
         NavigationSystem.init();
         
-        // Inicializar sistemas de conteúdo
-        ProfessionalsSystem.init();
+        // Log de inicialização
+        console.log('🚀 TxunaJob - Sistemas globais inicializados');
     }
 }
 
@@ -559,44 +367,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Exportar para uso global
 window.TxunaJobApp = TxunaJobApp;
-window.ProfessionalsSystem = ProfessionalsSystem;
-
-// Funções para os modais
-function showLoginModal() {
-    document.getElementById('loginModal').classList.remove('hidden');
-    document.getElementById('modalOverlay').classList.remove('hidden');
-}
-
-function closeLoginModal() {
-    document.getElementById('loginModal').classList.add('hidden');
-    document.getElementById('modalOverlay').classList.add('hidden');
-}
-
-function showRegisterOptions() {
-    document.getElementById('registerOptionsModal').classList.remove('hidden');
-    document.getElementById('modalOverlay').classList.remove('hidden');
-}
-
-function closeRegisterOptions() {
-    document.getElementById('registerOptionsModal').classList.add('hidden');
-    document.getElementById('modalOverlay').classList.add('hidden');
-}
-
-// Fechar modais clicando no overlay
-document.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('modalOverlay');
-    if (overlay) {
-        overlay.addEventListener('click', function() {
-            closeLoginModal();
-            closeRegisterOptions();
-        });
-    }
-    
-    // Fechar modais com ESC
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeLoginModal();
-            closeRegisterOptions();
-        }
-    });
-});
+window.ThemeSystem = ThemeSystem;
+window.AccessibilitySystem = AccessibilitySystem;
+window.MobileMenuSystem = MobileMenuSystem;
+window.NavigationSystem = NavigationSystem;
+window.NotificationSystem = NotificationSystem;

@@ -64,11 +64,13 @@
                 <div style="display: flex; align-items: center; gap: 1.5rem; flex-wrap: wrap;">
                     <div style="flex: 1; min-width: 200px;">
                         <h3 style="margin-bottom: 0.5rem; color: var(--dark-text);">
-                            {{ current_user.professional_profile.full_name if current_user.professional_profile else current_user.username }}
+                            {{ current_user.professional_profile.full_name if current_user.professional_profile else
+                            current_user.username }}
                         </h3>
                         <div class="specialty-badge" style="margin-bottom: 1rem;">
                             <i class="fas fa-tools"></i>
-                            {{ current_user.professional_profile.specialty if current_user.professional_profile else 'Especialidade' }}
+                            {{ current_user.professional_profile.specialty if current_user.professional_profile else
+                            'Especialidade' }}
                         </div>
                         <div class="rating-display" style="margin-bottom: 0.5rem;">
                             <i class="fas fa-star"></i>
@@ -80,7 +82,8 @@
                         </p>
                     </div>
                     <div style="text-align: center;">
-                        <div style="width: 80px; height: 80px; background: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">
+                        <div
+                            style="width: 80px; height: 80px; background: var(--primary-blue); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem; margin-bottom: 0.5rem;">
                             <i class="fas fa-user"></i>
                         </div>
                         <a href="{{ url_for('profile') }}" class="btn btn-outline" style="padding: 0.5rem 1rem;">
@@ -170,87 +173,48 @@
 
 <!-- Modal Novo Serviço -->
 <div id="novoServicoModal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>📋 Criar Novo Serviço</h2>
-            <span class="close">&times;</span>
+    <div class="form-row">
+        <div class="form-group">
+            <label for="specialty"><i class="fas fa-tools"></i> Especialidade *</label>
+            <select id="specialty" name="specialty" required>
+                <option value="">Selecione sua especialidade</option>
+                <option value="Eletricista">Eletricista</option>
+                <option value="Encanador">Encanador</option>
+                <option value="Pintor">Pintor</option>
+                <option value="Pedreiro">Pedreiro</option>
+                <option value="Marceneiro">Marceneiro</option>
+                <option value="Mecânico">Mecânico</option>
+                <option value="Técnico Informática">Técnico de Informática</option>
+                <option value="Jardineiro">Jardineiro</option>
+                <option value="Diarista">Diarista</option>
+                <option value="Outro">Outro</option>
+            </select>
         </div>
-        <div class="modal-body">
-            <form id="novoServicoForm">
-                <div class="form-group">
-                    <label for="servicoTitulo">Título do Serviço *</label>
-                    <input type="text" id="servicoTitulo" name="title" required 
-                           placeholder="Ex: Instalação Elétrica Residencial">
-                </div>
-                
-                <div class="form-group">
-                    <label for="servicoCategoria">Categoria *</label>
-                    <select id="servicoCategoria" name="category" required>
-                        <option value="">Selecione uma categoria</option>
-                        <!-- Categorias serão carregadas via JavaScript -->
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="servicoDescricao">Descrição Detalhada *</label>
-                    <textarea id="servicoDescricao" name="description" rows="4" required
-                              placeholder="Descreva detalhadamente o serviço que oferece..."></textarea>
-                </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="servicoPreco">Preço (MT) *</label>
-                        <input type="number" id="servicoPreco" name="price" min="0" step="0.01" required
-                               placeholder="Ex: 1500.00">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="servicoDuracao">Duração Estimada</label>
-                        <input type="text" id="servicoDuracao" name="duration"
-                               placeholder="Ex: 2-3 horas, 1 dia">
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="servicoLocalizacao">Localização</label>
-                    <input type="text" id="servicoLocalizacao" name="location" 
-                           value="{{ current_user.location }}" 
-                           placeholder="Onde você atende?">
-                </div>
-                
-                <div class="form-group">
-                    <label for="servicoTags">Tags (separadas por vírgula)</label>
-                    <input type="text" id="servicoTags" name="tags"
-                           placeholder="Ex: instalação, reparação, manutenção">
-                </div>
-                
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelarServico">Cancelar</button>
-                    <button type="submit" class="btn btn-primary" id="criarServicoBtn">
-                        <i class="fas fa-plus"></i> Criar Serviço
-                    </button>
-                </div>
-            </form>
+        <div class="form-actions">
+            <button type="button" class="btn btn-secondary" id="cancelarServico">Cancelar</button>
+            <button type="submit" class="btn btn-primary" id="criarServicoBtn">
+                <i class="fas fa-plus"></i> Criar Serviço
+            </button>
         </div>
-    </div>
-</div>
 
-<!-- Modal de Sucesso -->
-<div id="successModal" class="modal">
-    <div class="modal-content success-modal">
-        <div class="modal-header">
-            <h2>✅ Sucesso!</h2>
-        </div>
-        <div class="modal-body">
-            <p id="successMessage">Serviço criado com sucesso!</p>
-            <div class="form-actions">
-                <button type="button" class="btn btn-primary" id="fecharSuccessModal">Fechar</button>
+    </div>
+
+    <!-- Modal de Sucesso -->
+    <div id="successModal" class="modal">
+        <div class="modal-content success-modal">
+            <div class="modal-header">
+                <h2>✅ Sucesso!</h2>
+            </div>
+            <div class="modal-body">
+                <p id="successMessage">Serviço criado com sucesso!</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" id="fecharSuccessModal">Fechar</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-{% endblock %}
+    {% endblock %}
 
-{% block extra_js %}
-<script src="{{ url_for('static', filename='js/professional_dashboard.js') }}"></script>
-{% endblock %}
+    {% block extra_js %}
+    <script src="{{ url_for('static', filename='js/professional_dashboard.js') }}"></script>
+    {% endblock %}
