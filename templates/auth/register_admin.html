@@ -27,7 +27,7 @@
             {% endif %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('register_admin') }}" class="auth-form">
+        <form method="POST" action="{{ url_for('auth.register_admin') }}" class="auth-form">
             <div class="form-group">
                 <label for="username"><i class="fas fa-user"></i> Nome de Usuário *</label>
                 <input type="text" id="username" name="username" required 
@@ -52,11 +52,14 @@
                        placeholder="Senha segura para administrador">
             </div>
 
+            {% if is_first_admin %}
             <div class="form-group">
                 <label for="admin_key"><i class="fas fa-key"></i> Chave de Administrador *</label>
                 <input type="password" id="admin_key" name="admin_key" required 
                        placeholder="Chave secreta de administração">
+                <small class="form-text">Chave obrigatória apenas para o primeiro administrador do sistema</small>
             </div>
+            {% endif %}
 
             <button type="submit" class="btn btn-primary btn-full">
                 <i class="fas fa-shield-alt"></i> Criar Conta Admin

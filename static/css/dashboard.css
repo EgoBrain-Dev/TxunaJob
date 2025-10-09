@@ -295,6 +295,223 @@
     font-size: 1.2rem;
 }
 
+/* =============================================================================
+   MODAL STYLES
+   ============================================================================= */
+
+.modal {
+    display: none; /* IMPORTANTE: Começa fechado */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: white;
+    margin: 5% auto;
+    padding: 0;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 600px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    animation: modalSlideIn 0.3s ease-out;
+}
+
+.success-modal {
+    max-width: 400px;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-header {
+    padding: 1.5rem 2rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--dark-text);
+    font-size: 1.5rem;
+}
+
+.close {
+    color: #aaa;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.close:hover {
+    color: var(--dark-text);
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* Form Styles */
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: var(--dark-text);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 2px solid #e0e0e0;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    box-sizing: border-box;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 100px;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--primary-blue);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #0099cc;
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #5a6268;
+}
+
+.btn-success {
+    background: var(--success-green);
+    color: white;
+}
+
+.btn-danger {
+    background: var(--error-color);
+    color: white;
+}
+
+.btn-sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 2px solid var(--primary-blue);
+    color: var(--primary-blue);
+}
+
+.btn-outline:hover {
+    background: var(--primary-blue);
+    color: white;
+}
+
+/* Loading States */
+.loading-spinner {
+    text-align: center;
+    padding: 2rem;
+    color: var(--dark-text);
+    opacity: 0.7;
+}
+
+.loading-spinner::after {
+    content: '⏳';
+    display: inline-block;
+    margin-left: 0.5rem;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Service Actions */
+.service-action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.service-client {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 0.5rem 0;
+    color: var(--dark-text);
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
 /* Tema Escuro para Dashboards */
 .dark-theme .dashboard-container {
     background: var(--dark-bg);
@@ -337,6 +554,38 @@
     color: var(--dark-text-color);
 }
 
+/* Tema Escuro para Modais */
+.dark-theme .modal-content {
+    background: var(--dark-card);
+    color: var(--dark-text-color);
+}
+
+.dark-theme .modal-header {
+    border-bottom-color: var(--dark-border);
+}
+
+.dark-theme .modal-header h2 {
+    color: var(--dark-text-color);
+}
+
+.dark-theme .form-group label {
+    color: var(--dark-text-color);
+}
+
+.dark-theme .form-group input,
+.dark-theme .form-group select,
+.dark-theme .form-group textarea {
+    background: var(--dark-bg);
+    border-color: var(--dark-border);
+    color: var(--dark-text-color);
+}
+
+.dark-theme .form-group input:focus,
+.dark-theme .form-group select:focus,
+.dark-theme .form-group textarea:focus {
+    border-color: var(--primary-blue);
+}
+
 /* Responsividade */
 @media (max-width: 968px) {
     .dashboard-grid {
@@ -345,6 +594,10 @@
     
     .dashboard-welcome h1 {
         font-size: 2rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
     }
 }
 
@@ -360,6 +613,19 @@
     .dashboard-header {
         padding: 2rem 0;
     }
+    
+    .modal-content {
+        margin: 10% auto;
+        width: 95%;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
 }
 
 @media (max-width: 480px) {
@@ -373,5 +639,18 @@
     
     .dashboard-welcome h1 {
         font-size: 1.6rem;
+    }
+    
+    .modal-content {
+        margin: 5% auto;
+        width: 98%;
+    }
+    
+    .modal-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .modal-body {
+        padding: 1rem;
     }
 }

@@ -1,549 +1,893 @@
 /**
- * Dashboard Profissional - TxunaJob
- * Sistema funcional com dados reais
+ * TxunaJob - Dashboard Profissional
+ * Sistema funcional com dados reais do MongoDB
  * Autor: EgoBrain-Dev
+ * Versão: 1.1.0 - Com funcionalidade de Novo Serviço
  */
 
 class ProfessionalDashboard {
     constructor() {
         this.currentUser = null;
-        this.stats = {
-            activeServices: 0,
-            averageRating: 0,
-            monthlyClients: 0,
-            unreadMessages: 0
-        };
+        this.stats = {};
         this.services = [];
-        this.schedule = [];
         this.reviews = [];
+        this.schedule = [];
+        this.categories = [];
         
         this.init();
     }
-    
+
     async init() {
         await this.loadCurrentUser();
         await this.loadDashboardData();
+        await this.loadCategories();
         this.setupEventListeners();
+        this.setupModalHandlers();
         this.updateUI();
     }
-    
+
     async loadCurrentUser() {
         try {
-            // Buscar dados do usuário atual da API
             const response = await fetch('/api/professional/current', {
                 headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                this.currentUser = await response.json();
-            } else {
-                throw new Error('Erro ao carregar dados do usuário');
-            }
-        } catch (error) {
-            console.error('Erro ao carregar usuário:', error);
-            this.showError('Erro ao carregar dados do dashboard');
-        }
-    }
-    
-    async loadDashboardData() {
-        try {
-            // Carregar estatísticas
-            await this.loadStats();
-            
-            // Carregar serviços
-            await this.loadServices();
-            
-            // Carregar agenda
-            await this.loadSchedule();
-            
-            // Carregar avaliações
-            await this.loadReviews();
-            
-        } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-            this.showError('Erro ao carregar dados do dashboard');
-        }
-    }
-    
-    async loadStats() {
-        try {
-            const response = await fetch('/api/professional/stats', {
-                headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`,
-                    'Content-Type': 'application/json'
-                }
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include'
             });
             
             if (response.ok) {
                 const data = await response.json();
-                this.stats = data.stats;
+                this.currentUser = data;
             } else {
-                // Fallback para dados calculados
-                this.calculateStats();
+                console.error('Erro ao carregar dados do usuário');
+                this.showError('Erro ao carregar dados do perfil');
             }
         } catch (error) {
-            this.calculateStats();
+            console.error('Erro na requisição:', error);
+            this.showError('Erro de conexão ao carregar perfil');
         }
     }
-    
-    calculateStats() {
-        // Calcular estatísticas baseadas nos dados locais
-        this.stats.activeServices = this.services.filter(s => 
-            s.status === 'in_progress' || s.status === 'pending'
-        ).length;
-        
-        this.stats.averageRating = this.reviews.length > 0 
-            ? this.reviews.reduce((sum, review) => sum + review.rating, 0) / this.reviews.length
-            : 0;
-            
-        this.stats.monthlyClients = this.getMonthlyClientsCount();
-        this.stats.unreadMessages = this.getUnreadMessagesCount();
-    }
-    
-    async loadServices() {
+
+    async loadDashboardData() {
         try {
-            const response = await fetch('/api/professional/services', {
-                headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`,
-                    'Content-Type': 'application/json'
-                }
+            // Carregar todos os dados em paralelo
+            const [statsResponse, servicesResponse, reviewsResponse, scheduleResponse] = await Promise.all([
+                fetch('/api/professional/stats', { credentials: 'include' }),
+                fetch('/api/professional/services', { credentials: 'include' }),
+                fetch('/api/professional/reviews', { credentials: 'include' }),
+                fetch('/api/professional/schedule', { credentials: 'include' })
+            ]);
+
+            if (statsResponse.ok) {
+                const statsData = await statsResponse.json();
+                this.stats = statsData.stats || {};
+            }
+
+            if (servicesResponse.ok) {
+                this.services = await servicesResponse.json();
+            }
+
+            if (reviewsResponse.ok) {
+                this.reviews = await reviewsResponse.json();
+            }
+
+            if (scheduleResponse.ok) {
+                this.schedule = await scheduleResponse.json();
+            }
+
+        } catch (error) {
+            console.error('Erro ao carregar dados do dashboard:', error);
+            this.showError('Erro ao carregar dados. Tente recarregar a página.');
+        }
+    }
+
+    async loadCategories() {
+        try {
+            const response = await fetch('/api/professional/categories', {
+                credentials: 'include'
             });
             
             if (response.ok) {
-                this.services = await response.json();
-            } else {
-                // Fallback para dados de exemplo baseados no usuário
-                this.services = this.getFallbackServices();
+                this.categories = await response.json();
+                this.populateCategories();
             }
         } catch (error) {
-            this.services = this.getFallbackServices();
+            console.error('Erro ao carregar categorias:', error);
         }
     }
-    
-    async loadSchedule() {
-        try {
-            const response = await fetch('/api/professional/schedule', {
-                headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                this.schedule = await response.json();
-            } else {
-                this.schedule = this.getFallbackSchedule();
-            }
-        } catch (error) {
-            this.schedule = this.getFallbackSchedule();
+
+    populateCategories() {
+        const categorySelect = document.getElementById('servicoCategoria');
+        if (!categorySelect) return;
+
+        // Limpar opções existentes (exceto a primeira)
+        while (categorySelect.children.length > 1) {
+            categorySelect.removeChild(categorySelect.lastChild);
         }
+
+        // Adicionar categorias
+        this.categories.forEach(category => {
+            const option = document.createElement('option');
+            option.value = category.value;
+            option.textContent = category.label;
+            categorySelect.appendChild(option);
+        });
     }
-    
-    async loadReviews() {
-        try {
-            const response = await fetch('/api/professional/reviews', {
-                headers: {
-                    'Authorization': `Bearer ${this.getAuthToken()}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            if (response.ok) {
-                this.reviews = await response.json();
-            } else {
-                this.reviews = this.getFallbackReviews();
-            }
-        } catch (error) {
-            this.reviews = this.getFallbackReviews();
-        }
-    }
-    
-    getFallbackServices() {
-        const specialty = this.currentUser?.professional_profile?.specialty || 'Eletricista';
-        const location = this.currentUser?.location || 'Maputo';
-        
-        return [
-            {
-                id: 1,
-                title: `Instalação ${specialty} - Casa Silva`,
-                description: `Instalação completa do sistema em ${location}`,
-                client_name: 'Maria Silva',
-                date: new Date(),
-                status: 'in_progress',
-                price: 2500.00,
-                address: 'Bairro Central, ' + location
-            },
-            {
-                id: 2,
-                title: `Manutenção ${specialty} - Empresa ABC`,
-                description: 'Manutenção preventiva do sistema',
-                client_name: 'João Carlos',
-                date: new Date(Date.now() + 86400000),
-                status: 'pending',
-                price: 1800.00,
-                address: 'Zona Industrial, ' + location
-            },
-            {
-                id: 3,
-                title: `Reparo ${specialty} - Apartamento 302`,
-                description: 'Reparo nas instalações',
-                client_name: 'Ana Santos',
-                date: new Date(Date.now() + 172800000),
-                status: 'pending',
-                price: 950.00,
-                address: 'Av. Principal, ' + location
-            }
-        ];
-    }
-    
-    getFallbackSchedule() {
-        return this.services
-            .filter(service => new Date(service.date) >= new Date())
-            .sort((a, b) => new Date(a.date) - new Date(b.date))
-            .slice(0, 3);
-    }
-    
-    getFallbackReviews() {
-        return [
-            {
-                id: 1,
-                client_name: 'Maria Santos',
-                rating: 5,
-                comment: 'Excelente profissional! Muito competente e educado. Recomendo!',
-                date: new Date(Date.now() - 86400000),
-                service_title: 'Instalação Elétrica Residencial'
-            },
-            {
-                id: 2,
-                client_name: 'João Carlos',
-                rating: 4.5,
-                comment: 'Trabalho bem feito e dentro do prazo combinado. Muito satisfeito!',
-                date: new Date(Date.now() - 172800000),
-                service_title: 'Manutenção Preventiva'
-            }
-        ];
-    }
-    
-    getMonthlyClientsCount() {
-        const currentMonth = new Date().getMonth();
-        const currentYear = new Date().getFullYear();
-        
-        return this.services.filter(service => {
-            const serviceDate = new Date(service.date);
-            return serviceDate.getMonth() === currentMonth && 
-                   serviceDate.getFullYear() === currentYear;
-        }).length;
-    }
-    
-    getUnreadMessagesCount() {
-        // Implementar lógica real de mensagens não lidas
-        return Math.floor(Math.random() * 5) + 1;
-    }
-    
-    getAuthToken() {
-        // Implementar lógica para obter token JWT
-        return localStorage.getItem('auth_token') || sessionStorage.getItem('auth_token');
-    }
-    
+
     setupEventListeners() {
-        // Ações Rápidas
+        // Ações rápidas
         document.querySelectorAll('.action-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.preventDefault();
-                this.handleQuickAction(btn.querySelector('span').textContent);
+                this.handleQuickAction(btn);
             });
         });
-        
-        // Serviços - clique para detalhes
-        document.querySelectorAll('.service-item').forEach((item, index) => {
-            item.addEventListener('click', () => {
-                this.showServiceDetails(this.services[index]);
-            });
+
+        // Serviços - ações
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.service-action')) {
+                const action = e.target.closest('.service-action');
+                this.handleServiceAction(action);
+            }
         });
-        
+
         // Atualização automática a cada 30 segundos
         setInterval(() => {
             this.loadDashboardData().then(() => this.updateUI());
         }, 30000);
+
+        // Prevenir comportamento padrão de links
+        document.querySelectorAll('a[href="#"]').forEach(link => {
+            link.addEventListener('click', (e) => e.preventDefault());
+        });
     }
-    
-    handleQuickAction(action) {
+
+    setupModalHandlers() {
+        // Elementos do modal
+        const novoServicoBtn = document.getElementById('novoServicoBtn');
+        const novoServicoModal = document.getElementById('novoServicoModal');
+        const closeModal = document.querySelector('.close');
+        const cancelarBtn = document.getElementById('cancelarServico');
+        const novoServicoForm = document.getElementById('novoServicoForm');
+        const successModal = document.getElementById('successModal');
+        const fecharSuccessModal = document.getElementById('fecharSuccessModal');
+
+        // Abrir modal
+        if (novoServicoBtn) {
+            novoServicoBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                this.abrirModalNovoServico();
+            });
+        }
+
+        // Fechar modal
+        if (closeModal) {
+            closeModal.addEventListener('click', () => this.fecharModal());
+        }
+
+        if (cancelarBtn) {
+            cancelarBtn.addEventListener('click', () => this.fecharModal());
+        }
+
+        // Fechar modal clicando fora
+        window.addEventListener('click', (e) => {
+            if (e.target === novoServicoModal) {
+                this.fecharModal();
+            }
+            if (e.target === successModal) {
+                this.fecharSuccessModal();
+            }
+        });
+
+        // Submissão do formulário
+        if (novoServicoForm) {
+            novoServicoForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.criarNovoServico();
+            });
+        }
+
+        // Fechar modal de sucesso
+        if (fecharSuccessModal) {
+            fecharSuccessModal.addEventListener('click', () => this.fecharSuccessModal());
+        }
+    }
+
+    abrirModalNovoServico() {
+        const novoServicoModal = document.getElementById('novoServicoModal');
+        if (novoServicoModal) {
+            novoServicoModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+            
+            // Preencher localização padrão
+            const locationInput = document.getElementById('servicoLocalizacao');
+            if (locationInput && this.currentUser && this.currentUser.location) {
+                locationInput.value = this.currentUser.location;
+            }
+        }
+    }
+
+    fecharModal() {
+        const novoServicoModal = document.getElementById('novoServicoModal');
+        if (novoServicoModal) {
+            novoServicoModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+            this.limparFormulario();
+        }
+    }
+
+    fecharSuccessModal() {
+        const successModal = document.getElementById('successModal');
+        if (successModal) {
+            successModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    limparFormulario() {
+        const form = document.getElementById('novoServicoForm');
+        if (form) {
+            form.reset();
+            
+            // Restaurar localização padrão
+            const locationInput = document.getElementById('servicoLocalizacao');
+            if (locationInput && this.currentUser && this.currentUser.location) {
+                locationInput.value = this.currentUser.location;
+            }
+        }
+    }
+
+    async criarNovoServico() {
+        const form = document.getElementById('novoServicoForm');
+        const criarBtn = document.getElementById('criarServicoBtn');
+        
+        if (!form) return;
+
+        // Validar campos obrigatórios
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.style.borderColor = 'var(--error-color)';
+                isValid = false;
+            } else {
+                field.style.borderColor = '';
+            }
+        });
+
+        if (!isValid) {
+            this.showError('Preencha todos os campos obrigatórios');
+            return;
+        }
+
+        // Coletar dados do formulário
+        const formData = new FormData(form);
+        const serviceData = {
+            title: formData.get('title'),
+            description: formData.get('description'),
+            category: formData.get('category'),
+            price: parseFloat(formData.get('price')),
+            location: formData.get('location'),
+            duration: formData.get('duration'),
+            tags: formData.get('tags')
+        };
+
+        // Validar preço
+        if (serviceData.price <= 0) {
+            this.showError('O preço deve ser maior que zero');
+            return;
+        }
+
+        try {
+            // Desabilitar botão durante a requisição
+            if (criarBtn) {
+                criarBtn.disabled = true;
+                criarBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+            }
+
+            const response = await fetch('/api/professional/services/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                credentials: 'include',
+                body: JSON.stringify(serviceData)
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                // Sucesso
+                this.fecharModal();
+                this.mostrarSucesso(result.message || 'Serviço criado com sucesso!');
+                
+                // Recarregar dados do dashboard
+                await this.loadDashboardData();
+                this.updateUI();
+            } else {
+                // Erro
+                this.showError(result.error || 'Erro ao criar serviço');
+            }
+
+        } catch (error) {
+            console.error('Erro ao criar serviço:', error);
+            this.showError('Erro de conexão ao criar serviço');
+        } finally {
+            // Reabilitar botão
+            if (criarBtn) {
+                criarBtn.disabled = false;
+                criarBtn.innerHTML = '<i class="fas fa-plus"></i> Criar Serviço';
+            }
+        }
+    }
+
+    mostrarSucesso(mensagem) {
+        const successModal = document.getElementById('successModal');
+        const successMessage = document.getElementById('successMessage');
+        
+        if (successModal && successMessage) {
+            successMessage.textContent = mensagem;
+            successModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        } else {
+            this.showSuccess(mensagem);
+        }
+    }
+
+    handleQuickAction(button) {
+        const action = button.querySelector('span').textContent;
+        
         switch(action) {
             case 'Novo Serviço':
-                this.createNewService();
+                this.abrirModalNovoServico();
                 break;
             case 'Agenda':
                 this.showSchedule();
                 break;
             case 'Mensagens':
-                this.showMessages();
+                this.openMessages();
                 break;
             case 'Relatórios':
                 this.showReports();
                 break;
+            default:
+                console.log('Ação não implementada:', action);
         }
     }
-    
-    createNewService() {
-        // Implementar criação de novo serviço
-        alert('Funcionalidade de novo serviço em desenvolvimento');
-    }
-    
-    showSchedule() {
-        // Implementar visualização da agenda
-        window.location.href = '/professional/schedule';
-    }
-    
-    showMessages() {
-        // Implementar visualização de mensagens
-        window.location.href = '/chat';
-    }
-    
-    showReports() {
-        // Implementar visualização de relatórios
-        alert('Funcionalidade de relatórios em desenvolvimento');
-    }
-    
-    showServiceDetails(service) {
-        // Implementar modal de detalhes do serviço
-        const modalHtml = `
-            <div class="modal-overlay active" id="serviceModalOverlay">
-                <div class="modal active" id="serviceModal">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h2><i class="fas fa-tasks"></i> Detalhes do Serviço</h2>
-                            <button class="modal-close" onclick="professionalDashboard.closeServiceModal()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="modal-body">
-                            <h3>${service.title}</h3>
-                            <p><strong>Cliente:</strong> ${service.client_name}</p>
-                            <p><strong>Descrição:</strong> ${service.description}</p>
-                            <p><strong>Endereço:</strong> ${service.address}</p>
-                            <p><strong>Data:</strong> ${new Date(service.date).toLocaleDateString('pt-MZ')}</p>
-                            <p><strong>Valor:</strong> ${service.price.toFixed(2)} MT</p>
-                            <p><strong>Status:</strong> <span class="service-status status-${service.status}">${this.getStatusText(service.status)}</span></p>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-primary" onclick="professionalDashboard.editService(${service.id})">
-                                <i class="fas fa-edit"></i> Editar Serviço
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
+
+    handleServiceAction(actionElement) {
+        const serviceId = actionElement.dataset.serviceId;
+        const action = actionElement.dataset.action;
         
-        document.body.insertAdjacentHTML('beforeend', modalHtml);
-    }
-    
-    closeServiceModal() {
-        const modal = document.getElementById('serviceModalOverlay');
-        if (modal) {
-            modal.remove();
+        switch(action) {
+            case 'accept':
+                this.acceptService(serviceId);
+                break;
+            case 'reject':
+                this.rejectService(serviceId);
+                break;
+            case 'complete':
+                this.completeService(serviceId);
+                break;
+            case 'details':
+                this.showServiceDetails(serviceId);
+                break;
+            default:
+                console.log('Ação de serviço não implementada:', action);
         }
     }
-    
-    editService(serviceId) {
-        // Implementar edição de serviço
-        alert(`Editando serviço #${serviceId}`);
-        this.closeServiceModal();
-    }
-    
-    getStatusText(status) {
-        const statusMap = {
-            'in_progress': 'Em Andamento',
-            'pending': 'Agendado',
-            'completed': 'Concluído',
-            'cancelled': 'Cancelado'
-        };
-        return statusMap[status] || status;
-    }
-    
+
     updateUI() {
         this.updateStats();
-        this.updateServicesList();
-        this.updateSchedule();
+        this.updateServices();
         this.updateReviews();
-        this.updateUserInfo();
+        this.updateSchedule();
+        this.updateProfileInfo();
     }
-    
+
     updateStats() {
-        // Atualizar estatísticas na UI
-        document.querySelectorAll('.stat-number')[0].textContent = this.stats.activeServices;
-        document.querySelectorAll('.stat-number')[1].textContent = this.stats.averageRating.toFixed(1);
-        document.querySelectorAll('.stat-number')[2].textContent = this.stats.monthlyClients;
-        document.querySelectorAll('.stat-number')[3].textContent = this.stats.unreadMessages;
-    }
-    
-    updateServicesList() {
-        const servicesContainer = document.querySelector('.service-list');
-        if (!servicesContainer) return;
+        // Atualizar cards de estatísticas
+        const stats = this.stats || {};
         
-        servicesContainer.innerHTML = this.services
-            .slice(0, 3) // Mostrar apenas os 3 primeiros
-            .map(service => this.createServiceHTML(service))
-            .join('');
+        document.querySelectorAll('.stat-card').forEach(card => {
+            const label = card.querySelector('.stat-label').textContent;
+            const numberElement = card.querySelector('.stat-number');
             
-        // Re-adicionar event listeners
-        servicesContainer.querySelectorAll('.service-item').forEach((item, index) => {
-            item.addEventListener('click', () => {
-                this.showServiceDetails(this.services[index]);
-            });
+            switch(label) {
+                case 'Serviços Ativos':
+                    numberElement.textContent = stats.activeServices || 0;
+                    break;
+                case 'Avaliação Média':
+                    numberElement.textContent = stats.averageRating || '0.0';
+                    break;
+                case 'Clientes Este Mês':
+                    numberElement.textContent = stats.monthlyClients || 0;
+                    break;
+                case 'Mensagens':
+                    numberElement.textContent = stats.unreadMessages || 0;
+                    break;
+            }
         });
     }
-    
-    createServiceHTML(service) {
+
+    updateServices() {
+        const container = document.getElementById('servicesList');
+        if (!container) return;
+
+        if (!this.services || this.services.length === 0) {
+            container.innerHTML = this.createEmptyServicesState();
+            return;
+        }
+
+        container.innerHTML = this.services.map(service => this.createServiceItem(service)).join('');
+    }
+
+    createServiceItem(service) {
+        const statusClass = this.getStatusClass(service.status);
+        const statusText = this.getStatusText(service.status);
+        const formattedDate = this.formatDate(service.date || service.created_at);
+        const formattedPrice = this.formatPrice(service.price);
+
         return `
-            <div class="service-item">
+            <div class="service-item" data-service-id="${service.id}">
                 <div class="service-header">
                     <h3 class="service-title">${service.title}</h3>
-                    <span class="service-date">${this.formatServiceDate(service.date)}</span>
+                    <span class="service-date">${formattedDate}</span>
                 </div>
                 <p class="service-description">${service.description}</p>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                    <span class="service-status status-${service.status}">${this.getStatusText(service.status)}</span>
-                    <span style="color: var(--primary-orange); font-weight: 600;">${service.price.toFixed(2)} MT</span>
+                <div class="service-client">
+                    <i class="fas fa-user"></i>
+                    <span>${service.client_name}</span>
+                </div>
+                <div class="service-actions">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                        <span class="service-status ${statusClass}">${statusText}</span>
+                        <span style="color: var(--primary-orange); font-weight: 600;">${formattedPrice}</span>
+                    </div>
+                    ${this.createServiceActions(service)}
                 </div>
             </div>
         `;
     }
-    
-    updateSchedule() {
-        const scheduleContainer = document.querySelector('.dashboard-sidebar .service-list');
-        if (!scheduleContainer) return;
+
+    createServiceActions(service) {
+        let actions = '';
         
-        scheduleContainer.innerHTML = this.schedule
-            .map(service => this.createScheduleHTML(service))
-            .join('');
+        switch(service.status) {
+            case 'pending':
+                actions = `
+                    <div class="service-action-buttons" style="margin-top: 0.5rem; display: flex; gap: 0.5rem;">
+                        <button class="btn btn-success btn-sm service-action" data-service-id="${service.id}" data-action="accept">
+                            <i class="fas fa-check"></i> Aceitar
+                        </button>
+                        <button class="btn btn-danger btn-sm service-action" data-service-id="${service.id}" data-action="reject">
+                            <i class="fas fa-times"></i> Recusar
+                        </button>
+                    </div>
+                `;
+                break;
+            case 'accepted':
+            case 'in_progress':
+                actions = `
+                    <div class="service-action-buttons" style="margin-top: 0.5rem;">
+                        <button class="btn btn-primary btn-sm service-action" data-service-id="${service.id}" data-action="complete">
+                            <i class="fas fa-check-circle"></i> Concluir
+                        </button>
+                    </div>
+                `;
+                break;
+            case 'confirmed':
+                actions = `
+                    <div class="service-action-buttons" style="margin-top: 0.5rem;">
+                        <button class="btn btn-primary btn-sm service-action" data-service-id="${service.id}" data-action="start">
+                            <i class="fas fa-play"></i> Iniciar
+                        </button>
+                    </div>
+                `;
+                break;
+        }
+        
+        return actions;
     }
-    
-    createScheduleHTML(service) {
-        return `
-            <div class="service-item">
-                <div class="service-header">
-                    <h3 class="service-title" style="font-size: 0.9rem;">${service.client_name}</h3>
-                    <span class="service-date">${this.formatScheduleDate(service.date)}</span>
-                </div>
-                <p class="service-description" style="font-size: 0.8rem;">
-                    ${this.formatTime(service.date)} - ${service.title}
-                </p>
-            </div>
-        `;
-    }
-    
+
     updateReviews() {
-        const reviewsContainer = document.querySelector('.message-list');
-        if (!reviewsContainer) return;
-        
-        reviewsContainer.innerHTML = this.reviews
-            .slice(0, 2) // Mostrar apenas 2 avaliações
-            .map(review => this.createReviewHTML(review))
-            .join('');
+        const container = document.getElementById('reviewsList');
+        if (!container) return;
+
+        if (!this.reviews || this.reviews.length === 0) {
+            container.innerHTML = this.createEmptyReviewsState();
+            return;
+        }
+
+        container.innerHTML = this.reviews.map(review => this.createReviewItem(review)).join('');
     }
-    
-    createReviewHTML(review) {
-        const stars = '★'.repeat(Math.floor(review.rating)) + 
-                     (review.rating % 1 !== 0 ? '½' : '') + 
-                     '☆'.repeat(5 - Math.ceil(review.rating));
-                     
+
+    createReviewItem(review) {
+        const stars = this.createStarRating(review.rating);
+        
         return `
             <div class="message-item">
                 <div class="message-header">
                     <h3 class="message-sender">${review.client_name}</h3>
-                    <div class="rating-display" style="color: var(--warning-yellow);">
+                    <div class="rating-display">
                         ${stars}
                     </div>
                 </div>
                 <p class="message-preview">${review.comment}</p>
+                <small style="color: var(--dark-text); opacity: 0.7;">
+                    ${this.formatDate(review.date)}
+                </small>
             </div>
         `;
     }
-    
-    updateUserInfo() {
-        if (!this.currentUser) return;
-        
-        // Atualizar informações do usuário
-        const profileElement = document.querySelector('.dashboard-welcome h1');
-        if (profileElement) {
-            profileElement.textContent = `Bem-vindo, ${this.currentUser.username}! 🛠️`;
+
+    updateSchedule() {
+        const container = document.getElementById('scheduleList');
+        if (!container) return;
+
+        if (!this.schedule || this.schedule.length === 0) {
+            container.innerHTML = this.createEmptyScheduleState();
+            return;
         }
-        
-        // Atualizar especialidade
-        const specialtyElement = document.querySelector('.specialty-badge');
-        if (specialtyElement && this.currentUser.professional_profile) {
-            specialtyElement.innerHTML = `<i class="fas fa-tools"></i> ${this.currentUser.professional_profile.specialty}`;
-        }
-        
-        // Atualizar localização
-        const locationElement = document.querySelector('.dashboard-welcome p + p');
-        if (locationElement && this.currentUser.location) {
-            locationElement.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${this.currentUser.location}`;
+
+        container.innerHTML = this.schedule.map(item => this.createScheduleItem(item)).join('');
+    }
+
+    createScheduleItem(schedule) {
+        return `
+            <div class="service-item">
+                <div class="service-header">
+                    <h3 class="service-title" style="font-size: 0.9rem;">${schedule.client_name}</h3>
+                    <span class="service-date">${this.formatDate(schedule.date, true)}</span>
+                </div>
+                <p class="service-description" style="font-size: 0.8rem;">
+                    ${this.formatTime(schedule.date)} - ${schedule.title}
+                </p>
+            </div>
+        `;
+    }
+
+    updateProfileInfo() {
+        // Atualizar informações do perfil se disponíveis
+        if (this.currentUser) {
+            const profile = this.currentUser.professional_profile || {};
+            
+            // Atualizar nome e especialidade no perfil card
+            const nameElement = document.querySelector('.dashboard-card h3');
+            if (nameElement && profile.full_name) {
+                nameElement.textContent = profile.full_name;
+            }
+            
+            // Atualizar especialidade
+            const specialtyElement = document.querySelector('.specialty-badge');
+            if (specialtyElement && profile.specialty) {
+                specialtyElement.innerHTML = `<i class="fas fa-tools"></i> ${profile.specialty}`;
+            }
+
+            // Atualizar localização
+            const locationElement = document.querySelector('.dashboard-card .fa-map-marker-alt').parentElement;
+            if (locationElement && this.currentUser.location) {
+                locationElement.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${this.currentUser.location}`;
+            }
+
+            // Atualizar avaliação se disponível nos stats
+            const ratingElement = document.querySelector('.rating-display span');
+            if (ratingElement && this.stats.averageRating) {
+                ratingElement.innerHTML = `${this.stats.averageRating} (avaliações)`;
+            }
         }
     }
-    
-    formatServiceDate(date) {
-        const today = new Date();
-        const serviceDate = new Date(date);
-        const diffTime = serviceDate - today;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        
-        if (diffDays === 0) return 'Hoje';
-        if (diffDays === 1) return 'Amanhã';
-        if (diffDays === -1) return 'Ontem';
-        if (diffDays < 0) return `${Math.abs(diffDays)} dias atrás`;
-        
-        return serviceDate.toLocaleDateString('pt-MZ', {
-            day: 'numeric',
-            month: 'short'
-        });
+
+    // Métodos utilitários (mantidos da versão anterior)
+    getStatusClass(status) {
+        const statusMap = {
+            'pending': 'status-pending',
+            'accepted': 'status-confirmed',
+            'in_progress': 'status-in-progress',
+            'completed': 'status-completed',
+            'cancelled': 'status-cancelled',
+            'confirmed': 'status-confirmed'
+        };
+        return statusMap[status] || 'status-pending';
     }
-    
-    formatScheduleDate(date) {
-        const serviceDate = new Date(date);
-        const today = new Date();
+
+    getStatusText(status) {
+        const statusMap = {
+            'pending': 'Pendente',
+            'accepted': 'Aceito',
+            'in_progress': 'Em Andamento',
+            'completed': 'Concluído',
+            'cancelled': 'Cancelado',
+            'confirmed': 'Confirmado'
+        };
+        return statusMap[status] || 'Pendente';
+    }
+
+    createStarRating(rating) {
+        const fullStars = Math.floor(rating);
+        const hasHalfStar = rating % 1 !== 0;
+        let stars = '';
         
-        if (serviceDate.toDateString() === today.toDateString()) {
-            return 'Hoje';
+        for (let i = 0; i < fullStars; i++) {
+            stars += '<i class="fas fa-star"></i>';
         }
         
-        if (serviceDate.getDate() === today.getDate() + 1) {
-            return 'Amanhã';
+        if (hasHalfStar) {
+            stars += '<i class="fas fa-star-half-alt"></i>';
         }
         
-        return serviceDate.toLocaleDateString('pt-MZ', {
-            day: 'numeric',
-            month: 'short'
-        });
+        const emptyStars = 5 - Math.ceil(rating);
+        for (let i = 0; i < emptyStars; i++) {
+            stars += '<i class="far fa-star"></i>';
+        }
+        
+        return stars;
     }
-    
-    formatTime(date) {
-        return new Date(date).toLocaleTimeString('pt-MZ', {
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+
+    formatDate(dateString, short = false) {
+        if (!dateString) return 'Data não definida';
+        
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffTime = date - now;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Hoje';
+            if (diffDays === 1) return 'Amanhã';
+            if (diffDays === -1) return 'Ontem';
+            if (diffDays < 7 && diffDays > -7) {
+                return short ? `${Math.abs(diffDays)} dias` : `Em ${Math.abs(diffDays)} dias`;
+            }
+            
+            return date.toLocaleDateString('pt-BR', {
+                day: 'numeric',
+                month: short ? 'short' : 'long',
+                year: short ? undefined : 'numeric'
+            });
+        } catch (error) {
+            return 'Data inválida';
+        }
     }
-    
+
+    formatTime(dateString) {
+        if (!dateString) return '';
+        try {
+            const date = new Date(dateString);
+            return date.toLocaleTimeString('pt-BR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+        } catch (error) {
+            return '';
+        }
+    }
+
+    formatPrice(price) {
+        if (!price) return 'Preço não definido';
+        return new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'MZN'
+        }).format(price);
+    }
+
+    // Estados vazios
+    createEmptyServicesState() {
+        return `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <h3>Nenhum serviço encontrado</h3>
+                <p>Quando receber solicitações, elas aparecerão aqui.</p>
+                <button class="btn btn-primary" onclick="location.reload()">
+                    <i class="fas fa-redo"></i>
+                    Recarregar
+                </button>
+            </div>
+        `;
+    }
+
+    createEmptyReviewsState() {
+        return `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-star"></i>
+                </div>
+                <h3>Nenhuma avaliação</h3>
+                <p>Suas avaliações aparecerão aqui quando clientes avaliarem seus serviços.</p>
+            </div>
+        `;
+    }
+
+    createEmptyScheduleState() {
+        return `
+            <div class="empty-state">
+                <div class="empty-icon">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <h3>Nada agendado</h3>
+                <p>Seus próximos agendamentos aparecerão aqui.</p>
+            </div>
+        `;
+    }
+
     showError(message) {
-        // Usar o sistema de notificação existente
-        if (window.showNotification) {
-            window.showNotification(message, 'error');
-        } else {
-            alert(message);
+        // Sistema de notificação simples
+        const notification = document.createElement('div');
+        notification.className = 'notification error';
+        notification.innerHTML = `
+            <i class="fas fa-exclamation-circle"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()">&times;</button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 5000);
+    }
+
+    showSuccess(message) {
+        const notification = document.createElement('div');
+        notification.className = 'notification success';
+        notification.innerHTML = `
+            <i class="fas fa-check-circle"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()">&times;</button>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+
+    // Métodos de ação
+    async acceptService(serviceId) {
+        try {
+            const response = await fetch(`/api/professional/services/${serviceId}/accept`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                await this.loadDashboardData();
+                this.updateUI();
+                this.showSuccess('Serviço aceito com sucesso!');
+            } else {
+                this.showError('Erro ao aceitar serviço');
+            }
+        } catch (error) {
+            this.showError('Erro de conexão');
         }
+    }
+
+    async rejectService(serviceId) {
+        if (!confirm('Tem certeza que deseja recusar este serviço?')) return;
+        
+        try {
+            const response = await fetch(`/api/professional/services/${serviceId}/reject`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                await this.loadDashboardData();
+                this.updateUI();
+                this.showSuccess('Serviço recusado.');
+            } else {
+                this.showError('Erro ao recusar serviço');
+            }
+        } catch (error) {
+            this.showError('Erro de conexão');
+        }
+    }
+
+    async completeService(serviceId) {
+        if (!confirm('Confirmar conclusão deste serviço?')) return;
+        
+        try {
+            const response = await fetch(`/api/professional/services/${serviceId}/complete`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include'
+            });
+            
+            if (response.ok) {
+                await this.loadDashboardData();
+                this.updateUI();
+                this.showSuccess('Serviço marcado como concluído!');
+            } else {
+                this.showError('Erro ao concluir serviço');
+            }
+        } catch (error) {
+            this.showError('Erro de conexão');
+        }
+    }
+
+    showServiceDetails(serviceId) {
+        const service = this.services.find(s => s.id === serviceId);
+        if (service) {
+            alert(`Detalhes do Serviço:\n\nTítulo: ${service.title}\nCliente: ${service.client_name}\nStatus: ${this.getStatusText(service.status)}\nPreço: ${this.formatPrice(service.price)}\nDescrição: ${service.description}`);
+        }
+    }
+
+    showSchedule() {
+        window.location.href = '/professional/schedule';
+    }
+
+    openMessages() {
+        window.location.href = '/chat';
+    }
+
+    showReports() {
+        window.location.href = '/professional/reports';
     }
 }
 
-// Inicializar quando DOM estiver carregado
+// Inicializar quando DOM carregar
 document.addEventListener('DOMContentLoaded', function() {
-    window.professionalDashboard = new ProfessionalDashboard();
+    new ProfessionalDashboard();
 });
 
-// Adicionar ao objeto global TxunaJobApp
-if (window.TxunaJobApp) {
-    window.TxunaJobApp.ProfessionalDashboard = ProfessionalDashboard;
+// Adicionar CSS para notificações
+const notificationStyles = `
+    .notification {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        color: white;
+        z-index: 10000;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        max-width: 400px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        animation: slideIn 0.3s ease-out;
+    }
+    
+    .notification.success {
+        background: var(--success-color, #28a745);
+    }
+    
+    .notification.error {
+        background: var(--error-color, #dc3545);
+    }
+    
+    .notification button {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.2rem;
+        cursor: pointer;
+        margin-left: auto;
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+`;
+
+// Adicionar estilos ao documento
+if (!document.querySelector('#notification-styles')) {
+    const styleSheet = document.createElement('style');
+    styleSheet.id = 'notification-styles';
+    styleSheet.textContent = notificationStyles;
+    document.head.appendChild(styleSheet);
 }
+
+// Exportar para uso global
+window.ProfessionalDashboard = ProfessionalDashboard;

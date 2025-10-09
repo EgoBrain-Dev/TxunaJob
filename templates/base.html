@@ -56,7 +56,7 @@
                                     <a href="{{ url_for('professional_dashboard') }}" class="btn"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                                 {% endif %}
                                 <a href="{{ url_for('profile') }}" class="btn"><i class="fas fa-user-edit"></i> Meu Perfil</a>
-                                <a href="{{ url_for('logout') }}" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                                <a href="{{ url_for('auth.logout') }}" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Sair</a>
                             </div>
                         </div>
                     {% else %}
@@ -94,7 +94,7 @@
                         <a href="{{ url_for('professional_dashboard') }}" class="btn"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
                     {% endif %}
                     <a href="{{ url_for('profile') }}" class="btn"><i class="fas fa-user-edit"></i> Meu Perfil</a>
-                    <a href="{{ url_for('logout') }}" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Sair</a>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-primary"><i class="fas fa-sign-out-alt"></i> Sair</a>
                 </div>
             {% else %}
                 <button class="btn btn-outline" onclick="showLoginModal()"><i class="fas fa-sign-in-alt"></i> Entrar</button>
@@ -158,7 +158,7 @@
                 <div class="footer-column">
                     <h3><i class="fas fa-user-hard-hat"></i> Para Profissionais</h3>
                     <ul>
-                        <li><a href="#"><i class="fas fa-user-plus"></i> Tornar-se Profissional</a></li>
+                        <li><a href="{{ url_for('auth.register_professional') }}"><i class="fas fa-user-plus"></i> Tornar-se Profissional</a></li>
                         <li><a href="#"><i class="fas fa-graduation-cap"></i> Centro de Formação</a></li>
                         <li><a href="#"><i class="fas fa-chart-line"></i> Dicas de Sucesso</a></li>
                         <li><a href="#"><i class="fas fa-question-circle"></i> Centro de Ajuda</a></li>
@@ -167,7 +167,7 @@
                 <div class="footer-column">
                     <h3><i class="fas fa-user"></i> Para Clientes</h3>
                     <ul>
-                        <li><a href="#"><i class="fas fa-search"></i> Como Contratar</a></li>
+                        <li><a href="{{ url_for('auth.register_client') }}"><i class="fas fa-search"></i> Como Contratar</a></li>
                         <li><a href="#"><i class="fas fa-shield-alt"></i> Dicas de Segurança</a></li>
                         <li><a href="#"><i class="fas fa-file-alt"></i> Termos de Uso</a></li>
                         <li><a href="#"><i class="fas fa-lock"></i> Política de Privacidade</a></li>

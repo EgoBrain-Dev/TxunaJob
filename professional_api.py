@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask_login import login_required, current_user
 from bson.objectid import ObjectId
 from datetime import datetime, timedelta
@@ -39,7 +39,8 @@ def api_professional_current():
         
         return jsonify(user_data)
         
-    except Exception:
+    except Exception as e:
+        print(f"Erro em api_professional_current: {e}")
         return jsonify({'error': 'Erro ao carregar dados'}), 500
 
 @professional_api_routes.route('/professional/stats')
@@ -56,21 +57,21 @@ def api_professional_stats():
         # Contar serviços ativos
         active_services = collections['services'].count_documents({
             'professional_id': professional_id,
-            'status': {'$in': ['pending', 'in_progress']}
-        }) if collections['services'] else 8
+            'status': {'$in': ['pending', 'in_progress', 'accepted', 'confirmed']}
+        }) if collections['services'] else 0
         
         # Calcular avaliação média
-        average_rating = 4.8
+        average_rating = 0.0
         if collections['services']:
             reviews_cursor = collections['services'].find({
                 'professional_id': professional_id,
                 'rating': {'$exists': True, '$ne': None}
             })
             ratings = [service.get('rating', 0) for service in reviews_cursor]
-            average_rating = sum(ratings) / len(ratings) if ratings else 4.8
+            average_rating = round(sum(ratings) / len(ratings), 1) if ratings else 0.0
         
         # Contar clientes deste mês
-        monthly_clients = 12
+        monthly_clients = 0
         if collections['services']:
             current_month = datetime.utcnow().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
             monthly_clients = collections['services'].count_documents({
@@ -82,18 +83,20 @@ def api_professional_stats():
         unread_messages = collections['messages'].count_documents({
             'receiver_id': professional_id,
             'is_read': False
-        }) if collections['messages'] else 3
+        }) if collections['messages'] else 0
         
         stats = {
             'activeServices': active_services,
-            'averageRating': round(average_rating, 1),
+            'averageRating': average_rating,
             'monthlyClients': monthly_clients,
             'unreadMessages': unread_messages
         }
         
         return jsonify({'success': True, 'stats': stats})
         
-    except Exception:
+    except Exception as e:
+        print(f"Erro em api_professional_stats: {e}")
+        # Fallback para dados de demonstração
         stats = {
             'activeServices': 8,
             'averageRating': 4.8,
@@ -148,7 +151,8 @@ def api_professional_services():
         
         return jsonify(services_list)
         
-    except Exception:
+    except Exception as e:
+        print(f"Erro em api_professional_services: {e}")
         services_list = get_fallback_services(current_user.id, collections)
         return jsonify(services_list)
 
@@ -203,7 +207,7 @@ def api_professional_schedule():
             schedule_data = list(collections['services'].find({
                 'professional_id': professional_id,
                 'scheduled_date': {'$gte': datetime.utcnow(), '$lte': next_week},
-                'status': {'$in': ['pending', 'confirmed']}
+                'status': {'$in': ['pending', 'confirmed', 'accepted', 'in_progress']}
             }).sort('scheduled_date', 1).limit(5))
             
             for service in schedule_data:
@@ -225,7 +229,8 @@ def api_professional_schedule():
         
         return jsonify(schedule_list)
         
-    except Exception:
+    except Exception as e:
+        print(f"Erro em api_professional_schedule: {e}")
         schedule_list = get_fallback_schedule(current_user.id, collections)
         return jsonify(schedule_list)
 
@@ -292,7 +297,8 @@ def api_professional_reviews():
         
         return jsonify(reviews_list)
         
-    except Exception:
+    except Exception as e:
+        print(f"Erro em api_professional_reviews: {e}")
         reviews_list = get_fallback_reviews()
         return jsonify(reviews_list)
 
@@ -316,22 +322,222 @@ def get_fallback_reviews():
         }
     ]
 
-@professional_api_routes.route('/admin/stats')
+# 🔥 NOVAS ROTAS DE AÇÃO - IMPLEMENTAÇÃO COMPLETA
+
+@professional_api_routes.route('/professional/services/<service_id>/accept', methods=['POST'])
 @login_required
-def admin_stats():
-    if current_user.user_type != 'admin':
-        return jsonify({'error': 'Não autorizado'}), 403
-
+def api_accept_service(service_id):
+    """Aceitar um serviço pendente"""
+    if current_user.user_type != 'professional':
+        return jsonify({'error': 'Acesso não autorizado'}), 403
+    
     collections = get_all_collections()
+    
+    try:
+        result = collections['services'].update_one(
+            {
+                '_id': ObjectId(service_id),
+                'professional_id': ObjectId(current_user.id),
+                'status': 'pending'
+            },
+            {
+                '$set': {
+                    'status': 'accepted',
+                    'accepted_at': datetime.utcnow(),
+                    'updated_at': datetime.utcnow()
+                }
+            }
+        )
+        
+        if result.modified_count == 1:
+            return jsonify({'success': True, 'message': 'Serviço aceito com sucesso'})
+        else:
+            return jsonify({'error': 'Serviço não encontrado ou já foi processado'}), 404
+            
+    except Exception as e:
+        print(f"Erro em api_accept_service: {e}")
+        return jsonify({'error': 'Erro ao aceitar serviço'}), 500
 
-    if not collections['users']:
-        return jsonify({'error': 'Sistema em manutenção'}), 503
+@professional_api_routes.route('/professional/services/<service_id>/reject', methods=['POST'])
+@login_required
+def api_reject_service(service_id):
+    """Rejeitar um serviço pendente"""
+    if current_user.user_type != 'professional':
+        return jsonify({'error': 'Acesso não autorizado'}), 403
+    
+    collections = get_all_collections()
+    
+    try:
+        result = collections['services'].update_one(
+            {
+                '_id': ObjectId(service_id),
+                'professional_id': ObjectId(current_user.id),
+                'status': 'pending'
+            },
+            {
+                '$set': {
+                    'status': 'rejected',
+                    'rejected_at': datetime.utcnow(),
+                    'updated_at': datetime.utcnow()
+                }
+            }
+        )
+        
+        if result.modified_count == 1:
+            return jsonify({'success': True, 'message': 'Serviço recusado'})
+        else:
+            return jsonify({'error': 'Serviço não encontrado ou já foi processado'}), 404
+            
+    except Exception as e:
+        print(f"Erro em api_reject_service: {e}")
+        return jsonify({'error': 'Erro ao recusar serviço'}), 500
 
-    stats = {
-        'total_users': collections['users'].count_documents({}),
-        'total_clients': collections['clients'].count_documents({}),
-        'total_professionals': collections['professionals'].count_documents({}),
-        'total_services': collections['services'].count_documents({}),
-        'pending_verifications': collections['professionals'].count_documents({'is_verified': False})
-    }
-    return jsonify({'success': True, 'stats': stats})
+@professional_api_routes.route('/professional/services/<service_id>/complete', methods=['POST'])
+@login_required
+def api_complete_service(service_id):
+    """Marcar serviço como concluído"""
+    if current_user.user_type != 'professional':
+        return jsonify({'error': 'Acesso não autorizado'}), 403
+    
+    collections = get_all_collections()
+    
+    try:
+        result = collections['services'].update_one(
+            {
+                '_id': ObjectId(service_id),
+                'professional_id': ObjectId(current_user.id),
+                'status': {'$in': ['accepted', 'in_progress']}
+            },
+            {
+                '$set': {
+                    'status': 'completed',
+                    'completed_at': datetime.utcnow(),
+                    'updated_at': datetime.utcnow()
+                }
+            }
+        )
+        
+        if result.modified_count == 1:
+            return jsonify({'success': True, 'message': 'Serviço concluído com sucesso'})
+        else:
+            return jsonify({'error': 'Serviço não encontrado ou não pode ser concluído'}), 404
+            
+    except Exception as e:
+        print(f"Erro em api_complete_service: {e}")
+        return jsonify({'error': 'Erro ao concluir serviço'}), 500
+
+@professional_api_routes.route('/professional/services/<service_id>/start', methods=['POST'])
+@login_required
+def api_start_service(service_id):
+    """Iniciar um serviço aceito"""
+    if current_user.user_type != 'professional':
+        return jsonify({'error': 'Acesso não autorizado'}), 403
+    
+    collections = get_all_collections()
+    
+    try:
+        result = collections['services'].update_one(
+            {
+                '_id': ObjectId(service_id),
+                'professional_id': ObjectId(current_user.id),
+                'status': 'accepted'
+            },
+            {
+                '$set': {
+                    'status': 'in_progress',
+                    'started_at': datetime.utcnow(),
+                    'updated_at': datetime.utcnow()
+                }
+            }
+        )
+        
+        if result.modified_count == 1:
+            return jsonify({'success': True, 'message': 'Serviço iniciado'})
+        else:
+            return jsonify({'error': 'Serviço não encontrado ou não pode ser iniciado'}), 404
+            
+    except Exception as e:
+        print(f"Erro em api_start_service: {e}")
+        return jsonify({'error': 'Erro ao iniciar serviço'}), 500
+
+# 🔥 NOVAS ROTAS PARA CRIAR SERVIÇOS
+
+@professional_api_routes.route('/professional/services/create', methods=['POST'])
+@login_required
+def api_create_service():
+    """Criar um novo serviço"""
+    if current_user.user_type != 'professional':
+        return jsonify({'error': 'Acesso não autorizado'}), 403
+    
+    collections = get_all_collections()
+    
+    try:
+        data = request.get_json()
+        
+        # Validação dos dados
+        required_fields = ['title', 'description', 'category', 'price']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'error': f'Campo obrigatório: {field}'}), 400
+        
+        # Buscar dados do profissional
+        professional_data = collections['professionals'].find_one({'user_id': ObjectId(current_user.id)})
+        if not professional_data:
+            return jsonify({'error': 'Perfil profissional não encontrado'}), 404
+        
+        # Processar tags
+        tags = []
+        if data.get('tags'):
+            if isinstance(data['tags'], str):
+                tags = [tag.strip() for tag in data['tags'].split(',') if tag.strip()]
+            elif isinstance(data['tags'], list):
+                tags = data['tags']
+        
+        # Criar novo serviço
+        new_service = {
+            'title': data['title'],
+            'description': data['description'],
+            'category': data['category'],
+            'price': float(data['price']),
+            'professional_id': ObjectId(current_user.id),
+            'professional_name': professional_data.get('full_name', current_user.username),
+            'professional_specialty': professional_data.get('specialty', ''),
+            'status': 'available',
+            'location': data.get('location', current_user.location),
+            'duration': data.get('duration', ''),
+            'tags': tags,
+            'created_at': datetime.utcnow(),
+            'updated_at': datetime.utcnow()
+        }
+        
+        # Inserir no banco de dados
+        result = collections['services'].insert_one(new_service)
+        
+        return jsonify({
+            'success': True, 
+            'message': 'Serviço criado com sucesso!',
+            'service_id': str(result.inserted_id)
+        })
+        
+    except Exception as e:
+        print(f"Erro em api_create_service: {e}")
+        return jsonify({'error': 'Erro ao criar serviço'}), 500
+
+@professional_api_routes.route('/professional/categories')
+@login_required
+def api_get_categories():
+    """Obter categorias de serviços disponíveis"""
+    categories = [
+        {'value': 'electrician', 'label': '👨‍💼 Eletricista'},
+        {'value': 'plumber', 'label': '🔧 Canalizador'},
+        {'value': 'carpenter', 'label': '🪚 Carpinteiro'},
+        {'value': 'painter', 'label': '🎨 Pintor'},
+        {'value': 'mechanic', 'label': '🔧 Mecânico'},
+        {'value': 'technician', 'label': '💻 Técnico Informático'},
+        {'value': 'cleaner', 'label': '🧹 Serviços de Limpeza'},
+        {'value': 'gardener', 'label': '🌿 Jardineiro'},
+        {'value': 'builder', 'label': '🏗️ Construtor'},
+        {'value': 'other', 'label': '🔧 Outros Serviços'}
+    ]
+    
+    return jsonify(categories)

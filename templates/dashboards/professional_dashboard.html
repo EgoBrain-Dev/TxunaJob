@@ -102,7 +102,7 @@
                     </div>
                     <div class="card-body">
                         <div class="quick-actions">
-                            <a href="#" class="action-btn">
+                            <a href="#" class="action-btn" id="novoServicoBtn">
                                 <i class="fas fa-plus"></i>
                                 <span>Novo Serviço</span>
                             </a>
@@ -128,40 +128,9 @@
                         <h2><i class="fas fa-tasks"></i> Serviços em Andamento</h2>
                     </div>
                     <div class="card-body">
-                        <div class="service-list">
-                            <div class="service-item">
-                                <div class="service-header">
-                                    <h3 class="service-title">Instalação Elétrica - Casa Silva</h3>
-                                    <span class="service-date">Hoje, 14:00</span>
-                                </div>
-                                <p class="service-description">Instalação completa do quadro elétrico e pontos de luz</p>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                                    <span class="service-status status-in-progress">Em Andamento</span>
-                                    <span style="color: var(--primary-orange); font-weight: 600;">2.500 MT</span>
-                                </div>
-                            </div>
-                            <div class="service-item">
-                                <div class="service-header">
-                                    <h3 class="service-title">Manutenção - Empresa ABC</h3>
-                                    <span class="service-date">Amanhã, 09:00</span>
-                                </div>
-                                <p class="service-description">Manutenção preventiva do sistema elétrico</p>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                                    <span class="service-status status-pending">Agendado</span>
-                                    <span style="color: var(--primary-orange); font-weight: 600;">1.800 MT</span>
-                                </div>
-                            </div>
-                            <div class="service-item">
-                                <div class="service-header">
-                                    <h3 class="service-title">Reparo - Apartamento 302</h3>
-                                    <span class="service-date">18 Dez, 10:00</span>
-                                </div>
-                                <p class="service-description">Reparo nas tomadas do living e quartos</p>
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
-                                    <span class="service-status status-pending">Confirmado</span>
-                                    <span style="color: var(--primary-orange); font-weight: 600;">950 MT</span>
-                                </div>
-                            </div>
+                        <div class="service-list" id="servicesList">
+                            <!-- Os serviços serão carregados via JavaScript -->
+                            <div class="loading-spinner">Carregando serviços...</div>
                         </div>
                     </div>
                 </div>
@@ -175,28 +144,9 @@
                         <h2><i class="fas fa-clock"></i> Agenda</h2>
                     </div>
                     <div class="card-body">
-                        <div class="service-list">
-                            <div class="service-item">
-                                <div class="service-header">
-                                    <h3 class="service-title" style="font-size: 0.9rem;">Casa Silva</h3>
-                                    <span class="service-date">Hoje</span>
-                                </div>
-                                <p class="service-description" style="font-size: 0.8rem;">14:00 - Instalação elétrica</p>
-                            </div>
-                            <div class="service-item">
-                                <div class="service-header">
-                                    <h3 class="service-title" style="font-size: 0.9rem;">Empresa ABC</h3>
-                                    <span class="service-date">Amanhã</span>
-                                </div>
-                                <p class="service-description" style="font-size: 0.8rem;">09:00 - Manutenção</p>
-                            </div>
-                            <div class="service-item">
-                                <div class="service-header">
-                                    <h3 class="service-title" style="font-size: 0.9rem;">Apartamento 302</h3>
-                                    <span class="service-date">18 Dez</span>
-                                </div>
-                                <p class="service-description" style="font-size: 0.8rem;">10:00 - Reparos</p>
-                            </div>
+                        <div class="service-list" id="scheduleList">
+                            <!-- A agenda será carregada via JavaScript -->
+                            <div class="loading-spinner">Carregando agenda...</div>
                         </div>
                     </div>
                 </div>
@@ -207,33 +157,9 @@
                         <h2><i class="fas fa-star"></i> Avaliações</h2>
                     </div>
                     <div class="card-body">
-                        <div class="message-list">
-                            <div class="message-item">
-                                <div class="message-header">
-                                    <h3 class="message-sender">Maria Santos</h3>
-                                    <div class="rating-display">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                    </div>
-                                </div>
-                                <p class="message-preview">Excelente profissional! Muito competente e educado...</p>
-                            </div>
-                            <div class="message-item">
-                                <div class="message-header">
-                                    <h3 class="message-sender">João Carlos</h3>
-                                    <div class="rating-display">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
-                                    </div>
-                                </div>
-                                <p class="message-preview">Trabalho bem feito e dentro do prazo combinado...</p>
-                            </div>
+                        <div class="message-list" id="reviewsList">
+                            <!-- As avaliações serão carregadas via JavaScript -->
+                            <div class="loading-spinner">Carregando avaliações...</div>
                         </div>
                     </div>
                 </div>
@@ -241,8 +167,89 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
+<!-- Modal Novo Serviço -->
+<div id="novoServicoModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>📋 Criar Novo Serviço</h2>
+            <span class="close">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="novoServicoForm">
+                <div class="form-group">
+                    <label for="servicoTitulo">Título do Serviço *</label>
+                    <input type="text" id="servicoTitulo" name="title" required 
+                           placeholder="Ex: Instalação Elétrica Residencial">
+                </div>
+                
+                <div class="form-group">
+                    <label for="servicoCategoria">Categoria *</label>
+                    <select id="servicoCategoria" name="category" required>
+                        <option value="">Selecione uma categoria</option>
+                        <!-- Categorias serão carregadas via JavaScript -->
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="servicoDescricao">Descrição Detalhada *</label>
+                    <textarea id="servicoDescricao" name="description" rows="4" required
+                              placeholder="Descreva detalhadamente o serviço que oferece..."></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="servicoPreco">Preço (MT) *</label>
+                        <input type="number" id="servicoPreco" name="price" min="0" step="0.01" required
+                               placeholder="Ex: 1500.00">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="servicoDuracao">Duração Estimada</label>
+                        <input type="text" id="servicoDuracao" name="duration"
+                               placeholder="Ex: 2-3 horas, 1 dia">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="servicoLocalizacao">Localização</label>
+                    <input type="text" id="servicoLocalizacao" name="location" 
+                           value="{{ current_user.location }}" 
+                           placeholder="Onde você atende?">
+                </div>
+                
+                <div class="form-group">
+                    <label for="servicoTags">Tags (separadas por vírgula)</label>
+                    <input type="text" id="servicoTags" name="tags"
+                           placeholder="Ex: instalação, reparação, manutenção">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelarServico">Cancelar</button>
+                    <button type="submit" class="btn btn-primary" id="criarServicoBtn">
+                        <i class="fas fa-plus"></i> Criar Serviço
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Sucesso -->
+<div id="successModal" class="modal">
+    <div class="modal-content success-modal">
+        <div class="modal-header">
+            <h2>✅ Sucesso!</h2>
+        </div>
+        <div class="modal-body">
+            <p id="successMessage">Serviço criado com sucesso!</p>
+            <div class="form-actions">
+                <button type="button" class="btn btn-primary" id="fecharSuccessModal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
 
 {% block extra_js %}
 <script src="{{ url_for('static', filename='js/professional_dashboard.js') }}"></script>

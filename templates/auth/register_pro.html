@@ -31,7 +31,7 @@
             {% endif %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('register_professional') }}" class="auth-form" id="registrationForm">
+        <form method="POST" action="{{ url_for('auth.register_professional') }}" class="auth-form" id="registrationForm">
             <div class="form-group">
                 <label for="username"><i class="fas fa-user"></i> Nome de Usuário *</label>
                 <input type="text" id="username" name="username" required 
@@ -273,8 +273,8 @@
         </form>
 
         <div class="auth-footer">
-            <p>Já tem uma conta? <a href="{{ url_for('login') }}">Faça login aqui</a></p>
-            <p>É um cliente? <a href="{{ url_for('register_client') }}">Cadastre-se como Cliente</a></p>
+            <p>Já tem uma conta? <a href="{{ url_for('auth.login') }}">Faça login aqui</a></p>
+            <p>É um cliente? <a href="{{ url_for('auth.register_client') }}">Cadastre-se como Cliente</a></p>
         </div>
     </div>
 </div>

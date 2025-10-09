@@ -27,7 +27,7 @@
             {% endif %}
         {% endwith %}
 
-        <form method="POST" action="{{ url_for('login') }}" class="auth-form">
+        <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form">
             <div class="form-group">
                 <label for="username"><i class="fas fa-user"></i> Usuário</label>
                 <input type="text" id="username" name="username" required 
@@ -46,7 +46,7 @@
             </div>
 
             <div class="form-options">
-                <a href="{{ url_for('forgot_password') }}" class="forgot-password">
+                <a href="{{ url_for('auth.forgot_password') }}" class="forgot-password">
                     <i class="fas fa-key"></i> Esqueceu a senha?
                 </a>
             </div>
@@ -58,8 +58,8 @@
 
         <div class="auth-footer">
             <p>Não tem conta? 
-                <a href="{{ url_for('register_client') }}">Cadastre-se como Cliente</a> ou 
-                <a href="{{ url_for('register_professional') }}">como Profissional</a>
+                <a href="{{ url_for('auth.register_client') }}">Cadastre-se como Cliente</a> ou 
+                <a href="{{ url_for('auth.register_professional') }}">como Profissional</a>
             </p>
         </div>
     </div>
