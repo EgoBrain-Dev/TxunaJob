@@ -1,9 +1,11 @@
-# wsgi.py - CORRIGIDO
-from app import app, init_db
+# =============================================
+# WSGI ENTRY POINT PARA VERCEL
+# =============================================
 
-# Inicializar banco de dados para produção
-with app.app_context():
-    init_db()
+from app import init_app  # ✅ importa a função que cria o app Flask
 
-if __name__ == '__main__':
-    app.run()
+# Inicializa a aplicação Flask configurada
+app = init_app()
+
+# ✅ Exporta o app para o Vercel
+# O Vercel procura automaticamente um objeto chamado "app"
